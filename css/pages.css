@@ -507,6 +507,81 @@
   font-size: 15px;
 }
 
+/* ---- SOBRE DADOS ---- */
+.sobre-dados {
+  margin-top: 24px;
+  padding: 20px;
+  background: #f4f6ff;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  border: 1.5px solid var(--border);
+}
+
+.sobre-dados-titulo {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sobre-dados-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+  background: none;
+  padding: 0;
+}
+
+.sobre-dados-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sobre-btn-exportar,
+.sobre-btn-importar {
+  margin-top: 0;
+  width: auto;
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s;
+  box-shadow: none;
+}
+
+.sobre-btn-exportar {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.sobre-btn-exportar:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25);
+}
+
+.sobre-btn-importar {
+  background: transparent;
+  color: var(--primary);
+  border: 1.5px solid var(--primary-light);
+}
+
+.sobre-btn-importar:hover {
+  background: #eff6ff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15);
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .pg-wrapper {

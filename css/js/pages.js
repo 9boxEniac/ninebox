@@ -66,11 +66,14 @@ function cadastrarPessoa() {
     return;
   }
 
+  // Hash simples da senha com btoa + salt
+  const senhaHash = btoa(senha + 'portal_estagio_salt');
+
   contatos.push({
     id: Date.now(),
     nome,
     email,
-    senha,
+    senha: senhaHash,
     tipo: tipoCadAtual,
     disciplina: tipoCadAtual === 'professor' ? disciplina : '',
     foto: fotoBase64 || null,
@@ -189,6 +192,8 @@ function renderResumo() {
   const contatos = getContatos();
   const avaliacoes = getAvaliacoes();
   const nineBox = JSON.parse(localStorage.getItem('nineBoxAvaliacoes') || '[]');
+  const avaliacoes180 = JSON.parse(localStorage.getItem('avaliacoes180') || '[]');
+  const respostas180 = JSON.parse(localStorage.getItem('respostas180') || '[]');
 
   const totalProf = avaliacoes.filter(a => a.tipo === 'professor').length;
   const totalEst = avaliacoes.filter(a => a.tipo === 'estagiario').length;
@@ -226,6 +231,14 @@ function renderResumo() {
       <span class="rel-stat-label">Superstars</span>
       <span class="rel-stat-valor">${superstars}</span>
     </div>
+    <div class="rel-stat">
+      <span class="rel-stat-label">Avaliações 180°</span>
+      <span class="rel-stat-valor">${avaliacoes180.length}</span>
+    </div>
+    <div class="rel-stat">
+      <span class="rel-stat-label">Respostas 180°</span>
+      <span class="rel-stat-valor">${respostas180.length}</span>
+    </div>
   `;
 }
 
@@ -246,46 +259,121 @@ function renderTabela() {
 
   if (avaliacoes.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" class="pg-empty">Nenhuma avaliação encontrada.</td></tr>';
-    return;
-  }
+  } else {
+    const estrelas = n => n > 0
+      ? `<span class="rel-estrelas">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>`
+      : '<span style="color:#ccc">—</span>';
 
-  const estrelas = n => n > 0
-    ? `<span class="rel-estrelas">${'★'.repeat(n)}${'☆'.repeat(5 - n)}</span>`
-    : '<span style="color:#ccc">—</span>';
+    tbody.innerHTML = avaliacoes.map(a => {
+      const c = a.criterios || {};
+      const tipoLabel = a.tipo === 'professor' ? 'Professor' : 'Estagiário';
 
-  tbody.innerHTML = avaliacoes.map(a => {
-    const c = a.criterios || {};
-    const tipoLabel = a.tipo === 'professor' ? 'Professor' : 'Estagiário';
+      if (a.tipoAvaliacao === 'comentario') {
+        return `
+          <tr>
+            <td><strong>${a.avaliado}</strong></td>
+            <td><span class="pg-badge ${a.tipo}">${tipoLabel}</span></td>
+            <td colspan="3" style="color:var(--text-muted);font-style:italic;font-size:12px">${a.comentario || '—'}</td>
+            <td>${a.data}</td>
+          </tr>`;
+      }
 
-    // Estagiário com comentário
-    if (a.tipoAvaliacao === 'comentario') {
       return `
         <tr>
           <td><strong>${a.avaliado}</strong></td>
           <td><span class="pg-badge ${a.tipo}">${tipoLabel}</span></td>
-          <td colspan="3" style="color:var(--text-muted);font-style:italic;font-size:12px">${a.comentario || '—'}</td>
+          <td>
+            <div style="display:flex;gap:4px;flex-wrap:wrap">
+              ${estrelas(c.pontualidade || 0)}
+              ${estrelas(c.comunicacao || 0)}
+              ${estrelas(c.tecnico || 0)}
+              ${estrelas(c.proatividade || 0)}
+              ${estrelas(c.equipe || 0)}
+            </div>
+          </td>
+          <td class="rel-media">${a.media} ★</td>
+          ${a.comentario ? `<td style="font-size:12px;color:var(--text-muted);font-style:italic">"${a.comentario}"</td>` : '<td>—</td>'}
           <td>${a.data}</td>
         </tr>`;
-    }
+    }).join('');
+  }
+
+  // ---- SEÇÃO 180° ----
+  renderTabela180(busca);
+}
+
+function renderTabela180(busca) {
+  // Criar ou localizar a seção de respostas 180°
+  let secao180 = document.getElementById('rel-secao-180');
+  const tableWrap = document.querySelector('.rel-table-wrap');
+  if (!tableWrap) return;
+
+  if (!secao180) {
+    secao180 = document.createElement('div');
+    secao180.id = 'rel-secao-180';
+    tableWrap.after(secao180);
+  }
+
+  const respostas180 = JSON.parse(localStorage.getItem('respostas180') || '[]');
+  let lista = respostas180.slice().reverse();
+
+  if (busca) {
+    lista = lista.filter(r =>
+      (r.respondente || '').toLowerCase().includes(busca) ||
+      (r.avaliacaoNome || '').toLowerCase().includes(busca)
+    );
+  }
+
+  if (lista.length === 0) {
+    secao180.innerHTML = `
+      <h4 style="margin:28px 0 12px;font-size:15px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px">
+        <i class="fa-solid fa-rotate"></i> Avaliações 180° — Respostas
+      </h4>
+      <p class="pg-empty">Nenhuma resposta 180° registrada.</p>`;
+    return;
+  }
+
+  const linhas = lista.map(r => {
+    const respostas = r.respostas || [];
+    const todasNotas = respostas.flatMap(rc => (rc.notas || []).filter(n => n !== null));
+    const mediaGeral = todasNotas.length
+      ? (todasNotas.reduce((a, b) => a + b, 0) / todasNotas.length).toFixed(1)
+      : '—';
+
+    const compResumo = respostas.map(rc =>
+      `<span style="font-size:11px;background:#eff6ff;color:#1e40af;padding:2px 8px;border-radius:100px;margin:2px;display:inline-block">
+        ${rc.compNome}: ${rc.media ? rc.media + ' ★' : '—'}
+      </span>`
+    ).join('');
 
     return `
       <tr>
-        <td><strong>${a.avaliado}</strong></td>
-        <td><span class="pg-badge ${a.tipo}">${tipoLabel}</span></td>
-        <td>
-          <div style="display:flex;gap:4px;flex-wrap:wrap">
-            ${estrelas(c.pontualidade || 0)}
-            ${estrelas(c.comunicacao || 0)}
-            ${estrelas(c.tecnico || 0)}
-            ${estrelas(c.proatividade || 0)}
-            ${estrelas(c.equipe || 0)}
-          </div>
-        </td>
-        <td class="rel-media">${a.media} ★</td>
-        ${a.comentario ? `<td style="font-size:12px;color:var(--text-muted);font-style:italic">"${a.comentario}"</td>` : '<td>—</td>'}
-        <td>${a.data}</td>
+        <td><strong>${r.respondente || 'Anônimo'}</strong></td>
+        <td style="font-size:12px;color:var(--text-muted)">${r.avaliacaoNome || '—'}</td>
+        <td><div style="display:flex;flex-wrap:wrap;gap:2px">${compResumo}</div></td>
+        <td class="rel-media">${mediaGeral !== '—' ? mediaGeral + ' ★' : '—'}</td>
+        <td>${r.data || '—'}</td>
       </tr>`;
   }).join('');
+
+  secao180.innerHTML = `
+    <h4 style="margin:28px 0 12px;font-size:15px;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:8px">
+      <i class="fa-solid fa-rotate"></i> Avaliações 180° — Respostas
+    </h4>
+    <div class="rel-table-wrap">
+      <table class="rel-table">
+        <thead>
+          <tr>
+            <th>Respondente</th>
+            <th>Avaliação</th>
+            <th>Competências</th>
+            <th>Média Geral</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    </div>`;
 }
 
 function exportarCSV() {

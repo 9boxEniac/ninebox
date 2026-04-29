@@ -35,17 +35,18 @@
         <span>Consultar</span>
       </a>
     </li>
-    <li class="navbar-item">
-      <a href="avaliacoes.html" class="navbar-link">
+    <li class="navbar-item navbar-item-dropdown">
+      <a href="#" class="navbar-link navbar-link-dropdown" onclick="toggleSubmenu(event, this)">
         <i class="fa-solid fa-star"></i>
         <span>Avaliações</span>
+        <i class="fa-solid fa-chevron-down navbar-chevron"></i>
       </a>
-    </li>
-    <li class="navbar-item">
-      <a href="nine-box.html" class="navbar-link">
-        <i class="fa-solid fa-th"></i>
-        <span>Nine Box</span>
-      </a>
+      <ul class="navbar-submenu">
+        <li><a href="avaliacoes.html" class="navbar-submenu-link"><i class="fa-solid fa-star"></i> Avaliações</a></li>
+        <li><a href="nine-box.html" class="navbar-submenu-link"><i class="fa-solid fa-th"></i> Nine Box</a></li>
+        <li><a href="competencias.html" class="navbar-submenu-link"><i class="fa-solid fa-clipboard-check"></i> Competências</a></li>
+        <li><a href="avaliacao-180.html" class="navbar-submenu-link"><i class="fa-solid fa-rotate"></i> 180°</a></li>
+      </ul>
     </li>
     <li class="navbar-item">
       <a href="relatorios.html" class="navbar-link">
@@ -115,9 +116,27 @@
       </div>
     </div>
 
+    <!-- SEÇÃO DE DADOS -->
+    <div class="sobre-dados">
+      <h4 class="sobre-dados-titulo">
+        <i class="fa-solid fa-database"></i> Gerenciar Dados
+      </h4>
+      <p class="sobre-dados-desc">Exporte um backup completo dos seus dados ou restaure a partir de um arquivo JSON.</p>
+      <div class="sobre-dados-btns">
+        <button class="sobre-btn-exportar" onclick="exportarDados()">
+          <i class="fa-solid fa-download"></i> Exportar dados
+        </button>
+        <button class="sobre-btn-importar" onclick="importarDados()">
+          <i class="fa-solid fa-upload"></i> Importar dados
+        </button>
+      </div>
+    </div>
+
   </div>
 </main>
 
+<script src="../css/js/script.js"></script>
+<script src="../css/js/dados.js"></script>
 <script src="../css/js/navbar.js"></script>
 </body>
 </html>

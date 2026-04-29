@@ -57,10 +57,15 @@ function entrar() {
     return;
   }
 
-  // Verifica senha
-  if (pessoa.senha && pessoa.senha !== senha) {
-    showToast('Senha incorreta.', 'error');
-    return;
+  // Verifica senha — compatível com senhas antigas (sem hash) e novas (btoa)
+  if (pessoa.senha) {
+    const senhaHash = btoa(senha + 'portal_estagio_salt');
+    // Tenta comparar com hash; se não bater, tenta comparação direta (senhas antigas)
+    const senhaValida = (pessoa.senha === senhaHash) || (pessoa.senha === senha);
+    if (!senhaValida) {
+      showToast('Senha incorreta.', 'error');
+      return;
+    }
   }
 
   // Salva sessão
@@ -124,6 +129,12 @@ function mostrarPerfil(pessoa) {
 
   // Avaliações
   renderAvaliacoesPerfil(pessoa);
+
+  // Seção de dados — apenas para professores
+  const dadosSection = document.getElementById('pf-dados-section');
+  if (dadosSection) {
+    dadosSection.style.display = pessoa.tipo === 'professor' ? 'block' : 'none';
+  }
 }
 
 // ---- STATS ----
@@ -246,10 +257,13 @@ function salvarPerfil() {
     return;
   }
 
+  // Hash da nova senha se fornecida
+  const senhaFinal = novaSenha ? btoa(novaSenha + 'portal_estagio_salt') : pessoa.senha;
+
   contatos[idx] = {
     ...pessoa,
     nome,
-    senha: novaSenha || pessoa.senha,
+    senha: senhaFinal,
     disciplina: pessoa.tipo === 'professor'
       ? (document.getElementById('pf-disciplina')?.value.trim() || '')
       : pessoa.disciplina,

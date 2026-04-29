@@ -186,6 +186,86 @@ header a::before {
   }
 }
 
+/* ---- NAVBAR DROPDOWN SUBMENU ---- */
+.navbar-item-dropdown {
+  position: relative;
+}
+
+.navbar-link-dropdown {
+  cursor: pointer;
+  user-select: none;
+}
+
+.navbar-chevron {
+  font-size: 10px !important;
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.navbar-item-dropdown.open .navbar-chevron {
+  transform: rotate(180deg);
+}
+
+.navbar-submenu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 1px);
+  left: 0;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  min-width: 200px;
+  z-index: 300;
+  list-style: none;
+  padding: 6px 0;
+  animation: dropdownIn 0.18s ease;
+}
+
+.navbar-item-dropdown.open .navbar-submenu,
+.navbar-item-dropdown:hover .navbar-submenu {
+  display: block;
+}
+
+.navbar-submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.navbar-submenu-link i {
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.navbar-submenu-link:hover {
+  background: #f0f9ff;
+  color: var(--primary);
+}
+
+.navbar-submenu-link:hover i {
+  color: var(--primary-light);
+}
+
+.navbar-submenu-link.active {
+  color: var(--primary);
+  font-weight: 600;
+  background: #eff6ff;
+}
+
+.navbar-submenu-link.active i {
+  color: var(--primary-light);
+}
+
 .user {
   position: absolute;
   right: 24px;
@@ -751,4 +831,182 @@ button:active {
   .card p {
     font-size: 12px;
   }
+}
+
+/* =============================================
+   DASHBOARD WELCOME (empty state)
+   ============================================= */
+.dash-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 48px 32px;
+  background: var(--surface);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+}
+
+.dash-welcome i {
+  font-size: 52px;
+  color: var(--primary-light);
+}
+
+.dash-welcome h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0;
+}
+
+.dash-welcome p {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dash-welcome-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+
+.dash-welcome-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(30, 58, 138, 0.25);
+}
+
+/* =============================================
+   DARK MODE TOGGLE BUTTON
+   ============================================= */
+#dark-mode-btn {
+  position: absolute;
+  right: 72px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  margin-top: 0;
+  padding: 0;
+  transition: all 0.2s;
+  box-shadow: none;
+}
+
+#dark-mode-btn:hover {
+  background: #f0f9ff;
+  color: var(--primary);
+  border-color: var(--primary-light);
+  transform: none;
+  box-shadow: none;
+}
+
+/* =============================================
+   DARK MODE — variáveis e overrides
+   ============================================= */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light-mode) {
+    --primary: #60a5fa;
+    --primary-light: #93c5fd;
+    --accent: #1e40af;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: #334155;
+  }
+
+  :root:not(.light-mode) body {
+    background: #0f172a;
+  }
+}
+
+body.dark-mode {
+  --primary: #60a5fa;
+  --primary-light: #93c5fd;
+  --accent: #1e40af;
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  background: #0f172a;
+}
+
+body.dark-mode header {
+  background: #1e293b;
+}
+
+body.dark-mode .navbar {
+  background: #1e293b;
+}
+
+body.dark-mode .navbar-submenu {
+  background: #1e293b;
+}
+
+body.dark-mode .navbar-submenu-link:hover {
+  background: #0f172a;
+}
+
+body.dark-mode .card {
+  background: #1e293b;
+}
+
+body.dark-mode .card::after {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
+body.dark-mode .form-box {
+  background: #1e293b;
+}
+
+body.dark-mode .form-box input,
+body.dark-mode .form-box select,
+body.dark-mode .form-box textarea {
+  background: #0f172a;
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+body.dark-mode .user-dropdown {
+  background: #1e293b;
+}
+
+body.dark-mode .user-dropdown-info {
+  background: #0f172a;
+}
+
+body.dark-mode #dark-mode-btn:hover {
+  background: #334155;
+  color: #93c5fd;
+}
+
+body.dark-mode .dash-welcome {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+body.dark-mode .dash-stat {
+  background: #1e293b;
 }

@@ -36,17 +36,18 @@
         <span>Consultar</span>
       </a>
     </li>
-    <li class="navbar-item">
-      <a href="pages/avaliacoes.html" class="navbar-link">
+    <li class="navbar-item navbar-item-dropdown">
+      <a href="#" class="navbar-link navbar-link-dropdown" onclick="toggleSubmenu(event, this)">
         <i class="fa-solid fa-star"></i>
         <span>Avaliações</span>
+        <i class="fa-solid fa-chevron-down navbar-chevron"></i>
       </a>
-    </li>
-    <li class="navbar-item">
-      <a href="pages/nine-box.html" class="navbar-link">
-        <i class="fa-solid fa-th"></i>
-        <span>Nine Box</span>
-      </a>
+      <ul class="navbar-submenu">
+        <li><a href="pages/avaliacoes.html" class="navbar-submenu-link"><i class="fa-solid fa-star"></i> Avaliações</a></li>
+        <li><a href="pages/nine-box.html" class="navbar-submenu-link"><i class="fa-solid fa-th"></i> Nine Box</a></li>
+        <li><a href="pages/competencias.html" class="navbar-submenu-link"><i class="fa-solid fa-clipboard-check"></i> Competências</a></li>
+        <li><a href="pages/avaliacao-180.html" class="navbar-submenu-link"><i class="fa-solid fa-rotate"></i> 180°</a></li>
+      </ul>
     </li>
     <li class="navbar-item">
       <a href="pages/relatorios.html" class="navbar-link">
@@ -171,6 +172,24 @@
           <i class="fa-solid fa-floppy-disk"></i> Salvar Alterações
         </button>
 
+        <!-- SEÇÃO DE DADOS — apenas para professores -->
+        <div id="pf-dados-section" style="display:none;margin-top:24px;padding:18px;background:#f4f6ff;border-radius:var(--radius-sm);border:1.5px solid var(--border)">
+          <h4 style="font-size:13px;font-weight:700;color:var(--primary);margin:0 0 8px;display:flex;align-items:center;gap:7px">
+            <i class="fa-solid fa-database"></i> Gerenciar Dados
+          </h4>
+          <p style="font-size:12px;color:var(--text-muted);margin:0 0 14px;line-height:1.5">
+            Exporte ou importe todos os dados do sistema.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onclick="exportarDados()" style="margin-top:0;width:auto;padding:8px 16px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+              <i class="fa-solid fa-download"></i> Exportar dados
+            </button>
+            <button onclick="importarDados()" style="margin-top:0;width:auto;padding:8px 16px;font-size:12px;font-weight:600;background:transparent;color:var(--primary);border:1.5px solid var(--primary-light);box-shadow:none;display:inline-flex;align-items:center;gap:6px">
+              <i class="fa-solid fa-upload"></i> Importar dados
+            </button>
+          </div>
+        </div>
+
       </div>
 
       <!-- ABA: AVALIAÇÕES -->
@@ -186,6 +205,7 @@
 </main>
 
 <script src="css/js/script.js"></script>
+<script src="css/js/dados.js"></script>
 <script src="css/js/perfil.js"></script>
 <script src="css/js/navbar.js"></script>
 </body>

@@ -166,6 +166,9 @@ function renderLista180() {
         </div>
       </div>
       <div class="r180-item-actions">
+        <a href="responder-180.html?id=${a.id}" class="r180-btn-responder" title="Responder avaliação">
+          <i class="fa-solid fa-pen-to-square"></i> Responder
+        </a>
         <button class="r180-btn-icon edit" onclick="abrirFormulario(${a.id})" title="Editar">
           <i class="fa-solid fa-pen"></i>
         </button>

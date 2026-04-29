@@ -3,16 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastrar — Portal de Estágio</title>
+  <title>Responder Avaliação 180° — Portal de Estágio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/pages.css">
+  <link rel="stylesheet" href="../css/responder-180.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
 
 <header>
-  <h2>Cadastrar</h2>
-  <a href="../index.html">Voltar</a>
+  <h2>Responder Avaliação 180°</h2>
+  <a href="avaliacao-180.html">Voltar</a>
 </header>
 
 <nav class="navbar">
@@ -24,7 +27,7 @@
       </a>
     </li>
     <li class="navbar-item">
-      <a href="cadastrar.html" class="navbar-link active">
+      <a href="cadastrar.html" class="navbar-link">
         <i class="fa-solid fa-user-plus"></i>
         <span>Cadastrar</span>
       </a>
@@ -45,7 +48,7 @@
         <li><a href="avaliacoes.html" class="navbar-submenu-link"><i class="fa-solid fa-star"></i> Avaliações</a></li>
         <li><a href="nine-box.html" class="navbar-submenu-link"><i class="fa-solid fa-th"></i> Nine Box</a></li>
         <li><a href="competencias.html" class="navbar-submenu-link"><i class="fa-solid fa-clipboard-check"></i> Competências</a></li>
-        <li><a href="avaliacao-180.html" class="navbar-submenu-link"><i class="fa-solid fa-rotate"></i> 180°</a></li>
+        <li><a href="avaliacao-180.html" class="navbar-submenu-link active"><i class="fa-solid fa-rotate"></i> 180°</a></li>
       </ul>
     </li>
     <li class="navbar-item">
@@ -69,57 +72,17 @@
   </ul>
 </nav>
 
-<main class="wrapper pg-wrapper">
-  <div class="pg-card">
-
-    <!-- TIPO -->
-    <div class="pg-type-toggle" role="group">
-      <button class="pg-type-btn active" data-tipo="estagiario" onclick="setTipoCad('estagiario')">
-        <i class="fa-solid fa-user-tie"></i> Estagiário
-      </button>
-      <button class="pg-type-btn" data-tipo="professor" onclick="setTipoCad('professor')">
-        <i class="fa-solid fa-chalkboard-user"></i> Professor
-      </button>
+<main class="resp180-main">
+  <div id="resp180-container">
+    <div style="text-align:center;padding:60px 20px;color:var(--text-muted)">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size:32px;color:var(--primary-light)"></i>
+      <p style="margin-top:12px">Carregando avaliação...</p>
     </div>
-
-    <!-- FOTO -->
-    <div class="pg-foto-wrap">
-      <div class="pg-foto-preview" id="foto-preview" onclick="document.getElementById('cad-foto').click()">
-        <i class="fa-solid fa-camera"></i>
-        <span>Adicionar foto</span>
-      </div>
-      <input type="file" id="cad-foto" accept="image/*" style="display:none" onchange="previewFoto(this)">
-    </div>
-
-    <div class="pg-field">
-      <label for="cad-nome">Nome completo</label>
-      <input type="text" id="cad-nome" placeholder="Digite o nome completo" autocomplete="off">
-    </div>
-
-    <div class="pg-field">
-      <label for="cad-email">E-mail acadêmico</label>
-      <input type="email" id="cad-email" placeholder="nome@universidade.edu.br">
-    </div>
-
-    <div class="pg-field" id="campo-senha">
-      <label for="cad-senha">Senha</label>
-      <input type="password" id="cad-senha" placeholder="Crie uma senha" autocomplete="new-password">
-    </div>
-
-    <div class="pg-field" id="campo-disciplina" style="display:none">
-      <label for="cad-disciplina">Disciplina</label>
-      <input type="text" id="cad-disciplina" placeholder="Ex: Engenharia de Software">
-    </div>
-
-    <button class="pg-btn" onclick="cadastrarPessoa()">
-      <i class="fa-solid fa-user-plus"></i> Cadastrar
-    </button>
-
   </div>
 </main>
 
 <script src="../css/js/script.js"></script>
-<script src="../css/js/pages.js"></script>
+<script src="../css/js/responder-180.js"></script>
 <script src="../css/js/navbar.js"></script>
 </body>
 </html>

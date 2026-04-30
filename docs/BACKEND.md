@@ -1,8 +1,8 @@
-# 🔧 Backend - Guia Completo
+# Backend - Guia Completo
 
-> **Stack**: Node.js + Express + Prisma + Supabase + JWT + Joi
+> Stack: Node.js + Express + Prisma + Supabase + JWT + Joi
 
-## 🚀 Início Rápido
+## Início Rápido
 
 ```bash
 # 1. Setup
@@ -19,7 +19,7 @@ npm run prisma:seed
 npm run dev  # http://localhost:3000
 ```
 
-## 📁 Estrutura
+## Estrutura
 
 ```
 backend/
@@ -39,9 +39,9 @@ backend/
 └── package.json
 ```
 
-## 👥 Divisão de Trabalho
+## Divisão de Trabalho
 
-### 🔵 Estagiário 1 - Usuários
+### Estagiário 1 - Usuários
 - Autenticação (login/logout)
 - CRUD de usuários
 - Sistema de RA (7 dígitos)
@@ -61,7 +61,7 @@ backend/
 
 ---
 
-### 🟢 Estagiário 2 - Avaliações
+### Estagiário 2 - Avaliações
 - Avaliações tradicionais
 - Sistema Nine Box
 - Estatísticas
@@ -82,7 +82,7 @@ backend/
 
 ---
 
-### 🟡 Estagiário 3 - Competências
+### Estagiário 3 - Competências
 - CRUD de competências
 - Relatórios
 - Dashboard
@@ -103,22 +103,22 @@ backend/
 
 ---
 
-## 🔐 Sistema de Permissões
+## Sistema de Permissões
 
 ### 3 Níveis
 
-**🔴 ADMIN**
+**ADMIN**
 - Cadastrar/deletar usuários
 - Acesso total
 - Cada admin tem seu próprio RA
 
-**🟡 GESTOR**
+**GESTOR**
 - Ver e avaliar colaboradores
 - Criar Nine Box
 - Ver relatórios da equipe
 - RA é o número que a pessoa já possui
 
-**🟢 COLABORADOR**
+**COLABORADOR**
 - Ver próprio perfil
 - Ver próprias avaliações
 - Responder avaliações 180°
@@ -202,7 +202,7 @@ isGestorOrAdminMiddleware  // Gestor ou admin
 
 ---
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 **Padrão**: Controller → Service → Repository
 
@@ -238,7 +238,7 @@ class UserRepository {
 
 ---
 
-## 🗄️ Schema Prisma
+## Schema Prisma
 
 ```prisma
 model User {
@@ -273,7 +273,7 @@ Ver schema completo: [`docs/backend/SCHEMA.prisma`](backend/SCHEMA.prisma)
 
 ---
 
-## 🧪 Testando
+## Testando
 
 ### 1. Login (Postman)
 
@@ -304,7 +304,7 @@ Colaborador:  ana@eniac.edu.br / senha123 (RA: use RA real)
 
 ---
 
-## 📝 Scripts
+## Scripts
 
 ```bash
 npm run dev              # Desenvolvimento
@@ -316,7 +316,7 @@ npm run prisma:seed      # Popular banco
 
 ---
 
-## ✅ Checklist
+## Checklist
 
 - [ ] Configurar .env
 - [ ] Rodar migrations
@@ -327,7 +327,7 @@ npm run prisma:seed      # Popular banco
 
 ---
 
-## 📚 Documentação Detalhada
+## Documentação Detalhada
 
 - [Estagiário 1 - Usuários](backend/ESTAGIARIO_1_USERS.md)
 - [Estagiário 2 - Avaliações](backend/ESTAGIARIO_2_EVALUATIONS.md)

@@ -1,29 +1,28 @@
-# 🚀 COMECE AQUI
+# Comece Aqui
 
-## 📚 Documentação Organizada
+## Documentação organizada
 
-A documentação está dividida em **2 arquivos principais** + documentos específicos por estagiário.
+Tem 2 arquivos principais + docs específicos por estagiário.
 
 ---
 
-## 🎯 Leia Primeiro
+## Leia primeiro
 
-### 🔧 Backend
-**Arquivo único com tudo**: [`BACKEND.md`](BACKEND.md)
+### Backend
+**Arquivo**: [`BACKEND.md`](BACKEND.md)
 
-Contém:
+Tem tudo:
 - Setup completo
 - Arquitetura (Controller → Service → Repository)
-- **Sistema de permissões** (Admin/Gestor/Colaborador) 🆕
-- **Sistema de RA** (7 dígitos únicos) 🆕
-- **Tabela de permissões por endpoint** 🆕
+- Sistema de permissões (Admin/Gestor/Colaborador)
+- Sistema de RA (7 dígitos)
 - Exemplos de código
 - Como testar
 
-### 🎨 Frontend
-**Arquivo único com tudo**: [`FRONTEND.md`](FRONTEND.md)
+### Frontend
+**Arquivo**: [`FRONTEND.md`](FRONTEND.md)
 
-Contém:
+Tem tudo:
 - Setup completo
 - Módulos principais (api.js, auth.js, validators.js)
 - Sistema de permissões
@@ -32,7 +31,7 @@ Contém:
 
 ---
 
-## 👥 Documentos por Estagiário
+## Docs por estagiário
 
 ### Backend (3 pessoas)
 
@@ -51,27 +50,29 @@ Contém:
 
 ---
 
-## 📖 Documentos de Apoio
+## Docs de apoio
 
-- [`GUIA_COMPLETO.md`](GUIA_COMPLETO.md) - Tutorial completo para fazer o projeto do zero 🆕
+- [`GUIA_COMPLETO.md`](GUIA_COMPLETO.md) - Tutorial completo pra fazer do zero
 - [`backend/FAQ.md`](backend/FAQ.md) - Perguntas frequentes backend
 - [`frontend/FAQ.md`](frontend/FAQ.md) - Perguntas frequentes frontend
-- [`backend/SCHEMA.prisma`](backend/SCHEMA.prisma) - Schema do banco de dados
+- [`backend/SCHEMA.prisma`](backend/SCHEMA.prisma) - Schema do banco
 - [`backend/DIAGRAMAS.md`](backend/DIAGRAMAS.md) - Diagramas visuais
-- [`CHANGELOG.md`](CHANGELOG.md) - Registro de todas as atualizações
+- [`CHANGELOG.md`](CHANGELOG.md) - Registro de atualizações
 
-**IMPORTANTE**: RA é um dado que cada pessoa já possui (como CPF). No cadastro, a pessoa informa seu RA.
+**Importante**: RA é como CPF - cada pessoa já tem o seu. No cadastro, a pessoa informa o RA dela.
 
 ---
 
-## 🗂️ Estrutura Final
+## Estrutura
 
 ```
 docs/
-├── START_HERE.md          ← Você está aqui
-├── INDEX.md               ← Índice completo
-├── BACKEND.md             ← 🔧 GUIA COMPLETO BACKEND
-├── FRONTEND.md            ← 🎨 GUIA COMPLETO FRONTEND
+├── START_HERE.md          # Você tá aqui
+├── INDEX.md               # Índice completo
+├── BACKEND.md             # Guia completo backend
+├── FRONTEND.md            # Guia completo frontend
+├── GUIA_COMPLETO.md       # Tutorial do zero
+├── CHANGELOG.md           # Atualizações
 │
 ├── backend/
 │   ├── ESTAGIARIO_1_USERS.md
@@ -89,7 +90,7 @@ docs/
 
 ---
 
-## ⚡ Início Rápido
+## Início rápido
 
 ### Backend
 ```bash
@@ -108,12 +109,10 @@ npx serve .
 
 ---
 
-## 🎯 Seu Próximo Passo
+## Próximo passo
 
 1. **Backend?** → Leia [`BACKEND.md`](BACKEND.md)
 2. **Frontend?** → Leia [`FRONTEND.md`](FRONTEND.md)
-3. Depois, veja o documento do seu módulo específico
+3. Depois, vê o doc do seu módulo
 
----
-
-**Boa sorte! 🚀**
+Qualquer dúvida, chama.

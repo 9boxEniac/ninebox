@@ -1,12 +1,12 @@
-# 🟢 ESTAGIÁRIO 2 - Módulo de Avaliações (Evaluations)
+# ESTAGIÁRIO 2 - Módulo de Avaliações (Evaluations)
 
-## 📊 Sua Responsabilidade
+## Sua Responsabilidade
 
-Você será responsável por todo o sistema de **avaliações de desempenho** do Portal de Gestão de Pessoas usando **JavaScript puro**.
+Você vai cuidar de todo o sistema de avaliações de desempenho do Portal de Gestão de Pessoas usando JavaScript puro.
 
 ---
 
-## 🎯 Objetivos
+## Objetivos
 
 1. Avaliações tradicionais (com estrelas 1-5)
 2. Avaliações por comentário
@@ -16,7 +16,7 @@ Você será responsável por todo o sistema de **avaliações de desempenho** do
 
 ---
 
-## 📋 Endpoints que você vai criar
+## Endpoints que você vai criar
 
 ### 1. POST /api/evaluations
 **Criar avaliação tradicional (APENAS GESTOR OU ADMIN)**
@@ -128,15 +128,15 @@ Authorization: Bearer {token}
 - ❌ Colaborador NÃO pode criar Nine Box
 
 **Categorias Nine Box:**
-- Performance 3 + Potential 3 = "Superstar" ⭐
-- Performance 3 + Potential 2 = "Especialista" 👩‍💼
-- Performance 3 + Potential 1 = "Âncora" ⚓
-- Performance 2 + Potential 3 = "Estrela" 🌟
-- Performance 2 + Potential 2 = "Núcleo" 💎
-- Performance 2 + Potential 1 = "Trabalhador" 👷‍♀️
-- Performance 1 + Potential 3 = "Enigma" 🔮
-- Performance 1 + Potential 2 = "Dilema" 🤔
-- Performance 1 + Potential 1 = "Questão" ❓
+- Performance 3 + Potential 3 = "Superstar"
+- Performance 3 + Potential 2 = "Especialista"
+- Performance 3 + Potential 1 = "Âncora"
+- Performance 2 + Potential 3 = "Estrela"
+- Performance 2 + Potential 2 = "Núcleo"
+- Performance 2 + Potential 1 = "Trabalhador"
+- Performance 1 + Potential 3 = "Enigma"
+- Performance 1 + Potential 2 = "Dilema"
+- Performance 1 + Potential 1 = "Questão"
 
 ---
 
@@ -261,7 +261,7 @@ Authorization: Bearer {token}
 
 ---
 
-## 🔐 Rotas Protegidas
+## Rotas Protegidas
 
 ### evaluation.routes.js
 
@@ -467,7 +467,7 @@ async findAll(filters, userId, userTipo) {
 
 ---
 
-## 📁 Estrutura de Arquivos
+## Estrutura de Arquivos
 
 ```
 src/modules/evaluations/
@@ -480,7 +480,7 @@ src/modules/evaluations/
 
 ---
 
-## 🔨 Exemplo de Implementação
+## Exemplo de Implementação
 
 ### evaluation.validation.js
 
@@ -694,7 +694,7 @@ module.exports = { EvaluationService };
 
 ---
 
-## ✅ Checklist de Implementação
+## Checklist de Implementação
 
 - [ ] Criar models Evaluation e NineBox no schema.prisma
 - [ ] Rodar migrations: `npx prisma migrate dev`
@@ -710,7 +710,7 @@ module.exports = { EvaluationService };
 
 ---
 
-## 🧪 Como Testar
+## Como Testar
 
 1. **Criar avaliação**: POST /api/evaluations
 2. **Criar avaliação por comentário**: POST /api/evaluations/comment
@@ -720,7 +720,7 @@ module.exports = { EvaluationService };
 
 ---
 
-## 📝 Dicas Importantes
+## Dicas Importantes
 
 1. **Validar permissões**: Apenas gestores podem avaliar colaboradores
 2. **Calcular médias** corretamente
@@ -731,4 +731,4 @@ module.exports = { EvaluationService };
 
 ---
 
-**Boa sorte! 🚀**
+Qualquer dúvida, chama.

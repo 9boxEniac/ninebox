@@ -1,12 +1,12 @@
-# 🔵 ESTAGIÁRIO FRONTEND 1 - Infraestrutura e Autenticação
+# ESTAGIÁRIO FRONTEND 1 - Infraestrutura e Autenticação
 
-## 👤 Sua Responsabilidade
+## Sua Responsabilidade
 
-Você será responsável pela **infraestrutura base** do frontend e pelo **sistema de autenticação**.
+Você vai cuidar da infraestrutura base do frontend e do sistema de autenticação.
 
 ---
 
-## 🎯 Objetivos
+## Objetivos
 
 1. Criar módulos base (API, Auth, Loading, Toast)
 2. Implementar sistema de login/logout
@@ -14,7 +14,7 @@ Você será responsável pela **infraestrutura base** do frontend e pelo **siste
 4. Melhorar estrutura de arquivos
 5. Implementar estados de loading
 
-**⚠️ IMPORTANTE**: O sistema agora suporta 3 tipos de usuário:
+**IMPORTANTE**: O sistema agora suporta 3 tipos de usuário:
 - **Admin** - Acesso total, pode cadastrar usuários (cada admin tem seu RA)
 - **Gestor** - Pode avaliar colaboradores (RA é o número que a pessoa já possui)
 - **Colaborador** - Acesso limitado (RA é o número que a pessoa já possui)
@@ -25,7 +25,7 @@ Você deve implementar métodos `isAdmin()` e `requireAdmin()` no módulo de aut
 
 ---
 
-## 📁 Arquivos que você vai criar
+## Arquivos que você vai criar
 
 ```
 js/
@@ -48,7 +48,7 @@ pages/
 
 ---
 
-## 🔨 Tarefas Detalhadas
+## Tarefas Detalhadas
 
 ### TAREFA 1: Criar config.js
 
@@ -523,7 +523,7 @@ window.utils = utils;
 
 ---
 
-## ✅ Checklist de Implementação
+## Checklist de Implementação
 
 - [ ] Criar pasta `js/` na raiz
 - [ ] Criar `js/config.js`
@@ -545,7 +545,7 @@ window.utils = utils;
 
 ---
 
-## 🧪 Como Testar
+## Como Testar
 
 ### 1. Testar API
 ```javascript
@@ -572,7 +572,7 @@ api.getUsers().then(console.log);
 
 ---
 
-## 📝 Dicas Importantes
+## Dicas Importantes
 
 1. **Sempre use try-catch** em funções async
 2. **Mostre loading** durante requisições
@@ -584,7 +584,7 @@ api.getUsers().then(console.log);
 
 ---
 
-## 🆘 Problemas Comuns
+## Problemas Comuns
 
 ### "api is not defined"
 → Importar `api.js` antes de usar
@@ -600,4 +600,4 @@ api.getUsers().then(console.log);
 
 ---
 
-**Boa sorte! 🚀**
+Qualquer dúvida, chama.

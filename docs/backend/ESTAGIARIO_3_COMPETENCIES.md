@@ -1,12 +1,12 @@
-# 🟡 ESTAGIÁRIO 3 - Módulo de Competências e Relatórios
+# ESTAGIÁRIO 3 - Módulo de Competências e Relatórios
 
-## 📈 Sua Responsabilidade
+## Sua Responsabilidade
 
-Você será responsável pelo sistema de **competências, relatórios e dashboard** do Portal de Gestão de Pessoas usando **JavaScript puro**.
+Você vai cuidar do sistema de competências, relatórios e dashboard do Portal de Gestão de Pessoas usando JavaScript puro.
 
 ---
 
-## 🎯 Objetivos
+## Objetivos
 
 1. Cadastro e gestão de competências
 2. Critérios de avaliação de competências
@@ -16,7 +16,7 @@ Você será responsável pelo sistema de **competências, relatórios e dashboar
 
 ---
 
-## 📋 Endpoints que você vai criar
+## Endpoints que você vai criar
 
 ### 1. POST /api/competencies
 **Criar nova competência (APENAS ADMIN)**
@@ -348,7 +348,7 @@ Authorization: Bearer {token}
 
 ---
 
-## 🔐 Rotas Protegidas
+## Rotas Protegidas
 
 ### competency.routes.js
 
@@ -553,7 +553,7 @@ async exportReport(userId, requestUserId, requestUserTipo) {
 
 ---
 
-## 📁 Estrutura de Arquivos
+## Estrutura de Arquivos
 
 ```
 src/modules/competencies/
@@ -571,7 +571,7 @@ src/modules/reports/
 
 ---
 
-## 🔨 Exemplo de Implementação
+## Exemplo de Implementação
 
 ### competency.validation.js
 
@@ -915,7 +915,7 @@ module.exports = { ReportService };
 
 ---
 
-## ✅ Checklist de Implementação
+## Checklist de Implementação
 
 - [ ] Criar model Competency no schema.prisma
 - [ ] Rodar migrations: `npx prisma migrate dev`
@@ -932,7 +932,7 @@ module.exports = { ReportService };
 
 ---
 
-## 🧪 Como Testar
+## Como Testar
 
 1. **Criar competência**: POST /api/competencies
 2. **Listar competências**: GET /api/competencies
@@ -942,7 +942,7 @@ module.exports = { ReportService };
 
 ---
 
-## 📝 Dicas Importantes
+## Dicas Importantes
 
 1. **Agregação de dados**: Use Promise.all para buscar dados em paralelo
 2. **Cálculos estatísticos**: Cuidado com divisão por zero
@@ -953,4 +953,4 @@ module.exports = { ReportService };
 
 ---
 
-**Boa sorte! 🚀**
+Qualquer dúvida, chama.

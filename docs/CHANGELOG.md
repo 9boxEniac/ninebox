@@ -31,13 +31,13 @@
 
 ## Atualização Completa - 30/04/2026
 
-### 🎉 Todas as atualizações foram concluídas!
+### Todas as atualizações foram concluídas!
 
 Documentação completamente atualizada e consistente com o sistema de RA e permissões de 3 níveis.
 
 **ÚLTIMA ATUALIZAÇÃO**: Adicionadas regras de permissão detalhadas e exemplos de código de rotas protegidas em todos os módulos do backend.
 
-### 🔧 Backend
+### Backend
 
 #### Schema Prisma Atualizado
 - ✅ Adicionado campo `ra` (String, unique, 7 dígitos)
@@ -89,7 +89,7 @@ Documentação completamente atualizada e consistente com o sistema de RA e perm
 
 ---
 
-### 🎨 Frontend
+### Frontend
 
 #### Autenticação
 - ✅ Método `isAdmin()` adicionado
@@ -109,7 +109,7 @@ Documentação completamente atualizada e consistente com o sistema de RA e perm
 
 ---
 
-### 📚 Documentação
+### Documentação
 
 #### Arquivos Principais
 - ✅ `docs/BACKEND.md` - Guia completo consolidado
@@ -137,7 +137,7 @@ Documentação completamente atualizada e consistente com o sistema de RA e perm
 
 ---
 
-## 📋 Checklist de Implementação
+## Checklist de Implementação
 
 ### Backend
 
@@ -189,7 +189,7 @@ Documentação completamente atualizada e consistente com o sistema de RA e perm
 
 ---
 
-## 🔐 Credenciais de Teste Atualizadas
+## Credenciais de Teste Atualizadas
 
 **IMPORTANTE**: Use RAs reais das pessoas. Os exemplos abaixo são fictícios.
 
@@ -227,7 +227,7 @@ Colaborador 3:
 
 ---
 
-## 📞 Próximos Passos
+## Próximos Passos
 
 1. **Backend**: Implementar as mudanças seguindo o checklist
 2. **Frontend**: Implementar as mudanças seguindo o checklist
@@ -236,4 +236,4 @@ Colaborador 3:
 
 ---
 
-**Documentação atualizada e consistente! 🚀**
+**Documentação atualizada e consistente!**

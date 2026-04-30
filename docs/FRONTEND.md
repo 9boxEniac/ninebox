@@ -1,8 +1,8 @@
-# 🎨 Frontend - Guia Completo
+# Frontend - Guia Completo
 
-> **Stack**: HTML + CSS + JavaScript (Vanilla)
+> Stack: HTML + CSS + JavaScript (Vanilla)
 
-## 🚀 Início Rápido
+## Início Rápido
 
 ```bash
 # Rodar servidor local
@@ -10,7 +10,7 @@ npx serve .
 # ou usar Live Server no VS Code
 ```
 
-## 📁 Estrutura
+## Estrutura
 
 ```
 frontend/
@@ -44,9 +44,9 @@ frontend/
         └── dashboard.js
 ```
 
-## 👥 Divisão de Trabalho
+## Divisão de Trabalho
 
-### 🔵 Estagiário 1 - Infraestrutura
+### Estagiário 1 - Infraestrutura
 **Criar módulos base**:
 - `js/config.js` - Configurações
 - `js/api.js` - Chamadas HTTP
@@ -58,7 +58,7 @@ frontend/
 
 ---
 
-### 🟢 Estagiário 2 - Integração
+### Estagiário 2 - Integração
 **Integrar com API**:
 - `js/validators.js` - Validações de formulário
 - Integrar CRUD de usuários
@@ -70,7 +70,7 @@ frontend/
 
 ---
 
-## 🔧 Módulos Principais
+## Módulos Principais
 
 ### 1. API (api.js)
 
@@ -305,7 +305,7 @@ function getErrorMessage(validator, fieldName) {
 
 ---
 
-## 🔐 Sistema de Permissões
+## Sistema de Permissões
 
 ### Proteger páginas
 
@@ -343,7 +343,7 @@ if (auth.isAdmin()) {
 
 ---
 
-## 🎨 Exemplo Completo: Login
+## Exemplo Completo: Login
 
 ### login.html
 
@@ -413,7 +413,7 @@ if (auth.isAuthenticated()) {
 
 ---
 
-## ✅ Checklist
+## Checklist
 
 ### Estagiário 1
 - [ ] Criar `js/config.js`
@@ -434,7 +434,7 @@ if (auth.isAuthenticated()) {
 
 ---
 
-## 📚 Documentação Detalhada
+## Documentação Detalhada
 
 - [Estagiário 1 - Infraestrutura](frontend/ESTAGIARIO_1_INFRAESTRUTURA.md)
 - [Estagiário 2 - Integração](frontend/ESTAGIARIO_2_INTEGRACAO.md)

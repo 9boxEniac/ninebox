@@ -1,12 +1,12 @@
-# 🟢 ESTAGIÁRIO FRONTEND 2 - Funcionalidades e Integração
+# ESTAGIÁRIO FRONTEND 2 - Funcionalidades e Integração
 
-## 👤 Sua Responsabilidade
+## Sua Responsabilidade
 
-Você será responsável por **integrar as páginas com a API** e implementar todas as **funcionalidades CRUD**.
+Você vai integrar as páginas com a API e implementar todas as funcionalidades CRUD.
 
 ---
 
-## 🎯 Objetivos
+## Objetivos
 
 1. Criar módulo de validações (incluindo RA)
 2. Integrar página de cadastro com API (apenas admin pode cadastrar)
@@ -16,7 +16,7 @@ Você será responsável por **integrar as páginas com a API** e implementar to
 6. Melhorar feedback visual
 7. Atualizar dashboard com dados reais
 
-**⚠️ IMPORTANTE**: O sistema agora usa **RA (Registro Acadêmico)** de 7 dígitos:
+**IMPORTANTE**: O sistema agora usa RA (Registro Acadêmico) de 7 dígitos:
 - Cada pessoa já tem seu RA (como CPF)
 - No cadastro, a pessoa informa o RA dela
 - Sistema valida se tem 7 dígitos e se não está duplicado
@@ -27,7 +27,7 @@ Você será responsável por **integrar as páginas com a API** e implementar to
 
 ---
 
-## 📁 Arquivos que você vai trabalhar
+## Arquivos que você vai trabalhar
 
 ```
 js/
@@ -49,7 +49,7 @@ pages/
 
 ---
 
-## 🔨 Tarefas Detalhadas
+## Tarefas Detalhadas
 
 ### TAREFA 1: Criar validators.js
 
@@ -792,7 +792,7 @@ document.addEventListener('DOMContentLoaded', carregarDashboard);
 
 ---
 
-## ✅ Checklist de Implementação
+## Checklist de Implementação
 
 - [ ] Criar `js/validators.js`
 - [ ] Adicionar CSS de validação
@@ -814,7 +814,7 @@ document.addEventListener('DOMContentLoaded', carregarDashboard);
 
 ---
 
-## 🧪 Como Testar
+## Como Testar
 
 ### 1. Testar Cadastro
 1. Abrir `pages/cadastrar.html`
@@ -837,4 +837,4 @@ document.addEventListener('DOMContentLoaded', carregarDashboard);
 
 ---
 
-**Boa sorte! 🚀**
+Qualquer dúvida, chama.

@@ -1,8 +1,486 @@
-# 🔵 ESTAGIÁRIO 1 - Módulo de Usuários (Users)
+# Estagiário 1 - Módulo de Usuários
 
-## 👤 Sua Responsabilidade
+## O que você vai fazer
 
-Você será responsável por todo o sistema de **autenticação e gestão de usuários** do Portal de Gestão de Pessoas usando **JavaScript puro** (sem TypeScript).
+Você cuida de **tudo relacionado a usuários**: cadastro, login, permissões, busca por RA.
+
+Stack: Node.js + Express + Prisma + JWT + Joi (JavaScript puro, sem TypeScript)
+
+---
+
+## Seus endpoints (8 no total)
+
+### 1. POST /api/users/register
+Cadastrar usuário novo (só admin pode)
+
+**Body:**
+```json
+{
+  "ra": "2021001",
+  "nome": "João Silva",
+  "email": "joao@eniac.edu.br",
+  "senha": "senha123",
+  "tipo": "gestor",
+  "cargo": "Gerente de TI",
+  "departamento": "Tecnologia"
+}
+```
+
+**Regras:**
+- Só admin cadastra
+- RA tem que ter 7 dígitos
+- RA e email únicos
+- Não pode criar admin pela API
+
+### 2. POST /api/users/login
+Login básico
+
+**Body:**
+```json
+{
+  "email": "joao@eniac.edu.br",
+  "senha": "senha123"
+}
+```
+
+Retorna token JWT + dados do usuário
+
+### 3. GET /api/users/profile
+Ver próprio perfil (precisa estar logado)
+
+### 4. GET /api/users
+Listar usuários (gestor ou admin)
+
+Aceita filtros: `?tipo=gestor&departamento=TI`
+
+### 5. GET /api/users/ra/:ra
+Buscar por RA
+
+Exemplo: `GET /api/users/ra/2021001`
+
+### 6. DELETE /api/users/:id
+Deletar usuário (só admin)
+
+---
+
+## Sistema de permissões
+
+**Admin**
+- Cadastra/deleta qualquer um
+- Vê tudo
+- Cada admin tem seu RA
+
+**Gestor**
+- Vê e avalia colaboradores
+- Cria Nine Box
+- Vê relatórios da equipe
+
+**Colaborador**
+- Vê só próprio perfil
+- Vê próprias avaliações
+- Responde 180°
+
+### Middlewares que você vai criar
+
+```javascript
+// src/middlewares/auth.js
+
+// Verifica se tá logado
+function authMiddleware(req, res, next) {
+  // Checa token JWT
+  // Adiciona req.user
+}
+
+// Verifica se é admin
+function isAdminMiddleware(req, res, next) {
+  if (req.user?.tipo !== 'admin') {
+    throw new AppError('Só admin', 403);
+  }
+  next();
+}
+
+// Verifica se é gestor ou admin
+function isGestorOrAdminMiddleware(req, res, next) {
+  if (!['admin', 'gestor'].includes(req.user?.tipo)) {
+    throw new AppError('Sem permissão', 403);
+  }
+  next();
+}
+```
+
+---
+
+## Sistema de RA
+
+**O que é:** Número único de 7 dígitos que cada pessoa já tem (tipo CPF)
+
+**Como funciona:**
+- Pessoa informa o RA dela no cadastro
+- Sistema valida se tem 7 dígitos
+- Sistema checa se não tá duplicado
+- Pronto
+
+**Validação:**
+```javascript
+ra: Joi.string()
+  .pattern(/^[0-9]{7}$/)
+  .required()
+  .messages({
+    'string.pattern.base': 'RA tem que ter 7 dígitos',
+    'any.required': 'RA é obrigatório'
+  })
+```
+
+---
+
+## Estrutura dos arquivos
+
+```
+src/modules/users/
+├── user.controller.js    # Recebe HTTP
+├── user.service.js       # Lógica de negócio
+├── user.repository.js    # Queries Prisma
+├── user.routes.js        # Define rotas
+└── user.validation.js    # Validações Joi
+```
+
+Padrão: **Controller → Service → Repository**
+
+---
+
+## Schema Prisma
+
+```prisma
+model User {
+  id           String   @id @default(uuid())
+  ra           String   @unique
+  nome         String
+  email        String   @unique
+  senha        String
+  tipo         UserType
+  foto         String?
+  cargo        String?
+  departamento String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([ra])
+  @@map("users")
+}
+
+enum UserType {
+  admin
+  gestor
+  colaborador
+}
+```
+
+---
+
+## Implementação
+
+### user.repository.js
+
+```javascript
+class UserRepository {
+  constructor(prisma) {
+    this.prisma = prisma;
+  }
+
+  async create(data) {
+    return this.prisma.user.create({ data });
+  }
+
+  async findByEmail(email) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  async findByRA(ra) {
+    return this.prisma.user.findUnique({
+      where: { ra },
+      select: {
+        id: true,
+        ra: true,
+        nome: true,
+        email: true,
+        tipo: true,
+        foto: true,
+        cargo: true,
+        departamento: true,
+        createdAt: true
+      }
+    });
+  }
+
+  async raExists(ra) {
+    const user = await this.prisma.user.findUnique({
+      where: { ra },
+      select: { id: true }
+    });
+    return !!user;
+  }
+
+  async findAll(filters = {}) {
+    return this.prisma.user.findMany({
+      where: filters,
+      select: {
+        id: true,
+        ra: true,
+        nome: true,
+        email: true,
+        tipo: true,
+        foto: true,
+        cargo: true,
+        departamento: true,
+        createdAt: true
+      }
+    });
+  }
+
+  async deleteById(id) {
+    return this.prisma.user.delete({ where: { id } });
+  }
+}
+```
+
+### user.service.js
+
+```javascript
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { AppError } = require('../../utils/errors');
+
+class UserService {
+  constructor(userRepository) {
+    this.userRepository = userRepository;
+  }
+
+  async create(data, requestUserTipo) {
+    // Só admin cadastra
+    if (requestUserTipo !== 'admin') {
+      throw new AppError('Só admin pode cadastrar', 403);
+    }
+
+    // Checa se RA existe
+    const raExists = await this.userRepository.raExists(data.ra);
+    if (raExists) {
+      throw new AppError('RA já cadastrado', 400);
+    }
+
+    // Checa se email existe
+    const existingUser = await this.userRepository.findByEmail(data.email);
+    if (existingUser) {
+      throw new AppError('Email já cadastrado', 400);
+    }
+
+    // Não deixa criar admin pela API
+    if (data.tipo === 'admin') {
+      throw new AppError('Não pode criar admin pela API', 400);
+    }
+
+    // Hash da senha
+    const hashedPassword = await bcrypt.hash(data.senha, 10);
+
+    // Cria
+    const user = await this.userRepository.create({
+      ...data,
+      senha: hashedPassword
+    });
+
+    // Remove senha
+    const { senha, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+  }
+
+  async login(email, senha) {
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new AppError('Email ou senha errados', 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(senha, user.senha);
+    if (!isPasswordValid) {
+      throw new AppError('Email ou senha errados', 401);
+    }
+
+    // Gera token
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        tipo: user.tipo
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+    );
+
+    const { senha: _, ...userWithoutPassword } = user;
+
+    return {
+      token,
+      user: userWithoutPassword
+    };
+  }
+
+  async getUserByRA(ra) {
+    const user = await this.userRepository.findByRA(ra);
+    if (!user) {
+      throw new AppError('Usuário não encontrado', 404);
+    }
+    return user;
+  }
+
+  async deleteUser(id, requestUserTipo) {
+    if (requestUserTipo !== 'admin') {
+      throw new AppError('Só admin pode deletar', 403);
+    }
+
+    await this.userRepository.deleteById(id);
+  }
+}
+```
+
+### user.routes.js
+
+```javascript
+const { Router } = require('express');
+const { authMiddleware, isAdminMiddleware, isGestorOrAdminMiddleware } = require('../../middlewares/auth');
+
+const router = Router();
+
+// Público
+router.post('/login', (req, res, next) => userController.login(req, res, next));
+
+// Precisa estar logado
+router.use(authMiddleware);
+
+router.get('/profile', (req, res, next) => userController.getProfile(req, res, next));
+router.get('/ra/:ra', (req, res, next) => userController.getUserByRA(req, res, next));
+
+// Gestor ou admin
+router.get('/', isGestorOrAdminMiddleware, (req, res, next) => 
+  userController.listUsers(req, res, next)
+);
+
+// Só admin
+router.post('/register', isAdminMiddleware, (req, res, next) => 
+  userController.create(req, res, next)
+);
+router.delete('/:id', isAdminMiddleware, (req, res, next) => 
+  userController.deleteUser(req, res, next)
+);
+
+module.exports = { userRoutes: router };
+```
+
+---
+
+## Checklist
+
+- [ ] Atualizar schema.prisma (campo `ra` e tipo `admin`)
+- [ ] Rodar migration: `npx prisma migrate dev --name add-ra-and-admin`
+- [ ] Criar user.validation.js
+- [ ] Criar user.repository.js
+- [ ] Criar user.service.js
+- [ ] Criar user.controller.js
+- [ ] Criar middlewares de auth
+- [ ] Criar user.routes.js
+- [ ] Atualizar seed.js
+- [ ] Rodar seed: `npm run prisma:seed`
+- [ ] Testar no Postman
+
+---
+
+## Como testar
+
+### 1. Popular banco
+```bash
+npm run prisma:seed
+```
+
+### 2. Login como admin
+```http
+POST http://localhost:3000/api/users/login
+Content-Type: application/json
+
+{
+  "email": "admin@eniac.edu.br",
+  "senha": "admin123"
+}
+```
+
+Copia o token
+
+### 3. Cadastrar gestor
+```http
+POST http://localhost:3000/api/users/register
+Authorization: Bearer SEU_TOKEN
+Content-Type: application/json
+
+{
+  "ra": "2021003",
+  "nome": "Pedro Santos",
+  "email": "pedro@eniac.edu.br",
+  "senha": "senha123",
+  "tipo": "gestor",
+  "cargo": "Gerente de Vendas",
+  "departamento": "Comercial"
+}
+```
+
+### 4. Buscar por RA
+```http
+GET http://localhost:3000/api/users/ra/2021003
+Authorization: Bearer SEU_TOKEN
+```
+
+### 5. Tentar cadastrar como gestor (deve dar erro)
+```http
+# Login como gestor
+POST http://localhost:3000/api/users/login
+{
+  "email": "joao@eniac.edu.br",
+  "senha": "senha123"
+}
+
+# Tentar cadastrar (vai dar 403)
+POST http://localhost:3000/api/users/register
+Authorization: Bearer TOKEN_DO_GESTOR
+{
+  "ra": "2022004",
+  "nome": "Teste",
+  "email": "teste@eniac.edu.br",
+  "senha": "senha123",
+  "tipo": "colaborador"
+}
+```
+
+---
+
+## Credenciais de teste
+
+```
+Admin:
+  RA: 1234567 (use RA real)
+  Email: admin@eniac.edu.br
+  Senha: admin123
+
+Gestor:
+  RA: 2021001 (use RA real)
+  Email: joao@eniac.edu.br
+  Senha: senha123
+
+Colaborador:
+  RA: 2022001 (use RA real)
+  Email: ana@eniac.edu.br
+  Senha: senha123
+```
+
+**Lembra**: Use RAs reais das pessoas. Cada pessoa já tem seu RA.
+
+---
+
+Qualquer dúvida, chama.
 
 ---
 

@@ -74,6 +74,10 @@ frontend/
 
 ### 1. API (api.js)
 
+**IMPORTANTE**: O frontend faz requisições para o backend em `http://localhost:3000/api`.
+
+O backend deve ter **CORS configurado** para aceitar requisições do frontend (normalmente rodando em `http://localhost:5500` com Live Server).
+
 ```javascript
 const API_BASE_URL = 'http://localhost:3000/api';
 
@@ -114,6 +118,19 @@ class API {
     return this.request(`/users/ra/${ra}`);
   }
 
+  async register(userData) {
+    return this.request('/users/register', {
+      method: 'POST',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async deleteUser(id) {
+    return this.request(`/users/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Avaliações
   async createEvaluation(data) {
     return this.request('/evaluations', {
@@ -122,10 +139,30 @@ class API {
     });
   }
 
+  async getEvaluations(filters = {}) {
+    const params = new URLSearchParams(filters);
+    return this.request(`/evaluations?${params}`);
+  }
+
+  // Dashboard
+  async getDashboard() {
+    return this.request('/reports/dashboard');
+  }
+
   // ... outros métodos
 }
 
 const api = new API();
+```
+
+**Configuração CORS no Backend** (em `src/app.js`):
+```javascript
+import cors from 'cors';
+
+app.use(cors({
+  origin: 'http://localhost:5500', // URL do Live Server
+  credentials: true
+}));
 ```
 
 ### 2. Autenticação (auth.js)
@@ -297,7 +334,7 @@ function getErrorMessage(validator, fieldName) {
     email: 'Email inválido',
     password: 'Senha deve ter no mínimo 6 caracteres',
     name: 'Nome deve ter no mínimo 3 caracteres',
-    ra: 'RA deve ter 7 dígitos numéricos',
+    ra: 'RA deve ter entre 5 e 15 caracteres',
   };
   return messages[validator] || 'Campo inválido';
 }

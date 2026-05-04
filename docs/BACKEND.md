@@ -44,7 +44,7 @@ backend/
 ### Estagiário 1 - Usuários
 - Autenticação (login/logout)
 - CRUD de usuários
-- Sistema de RA (7 dígitos)
+- Sistema de RA (identificador único)
 - Permissões (Admin/Gestor/Colaborador)
 
 **Endpoints (8)**:
@@ -126,18 +126,18 @@ backend/
 
 ### Sistema de RA (Registro Acadêmico)
 
-Cada usuário tem um **RA único de 7 dígitos**.
+Cada usuário tem um **RA único**.
 
 **Como funciona**:
 - Cada colaborador e gestor do ENIAC já tem seu RA
 - No cadastro, a pessoa informa o RA dela
-- Sistema valida se tem 7 dígitos e se não está duplicado
+- Sistema valida o formato (5 a 15 caracteres) e se não está duplicado
 - Admin também tem RA próprio
 
 **Características**:
 - Único por usuário (constraint no banco)
 - Usado para busca: `GET /api/users/ra/:ra`
-- Validação: exatamente 7 dígitos numéricos
+- Validação: entre 5 e 15 caracteres
 - Não pode ser alterado após criação
 - É um dado que a pessoa já possui (como CPF)
 
@@ -206,34 +206,61 @@ isGestorOrAdminMiddleware  // Gestor ou admin
 
 **Padrão**: Controller → Service → Repository
 
+**IMPORTANTE**: Este projeto usa **ES Modules** (`import/export`), não CommonJS (`require/module.exports`).
+
+Configure `"type": "module"` no `package.json`:
+```json
+{
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js"
+  }
+}
+```
+
 ```javascript
 // Controller: Recebe HTTP, valida, retorna resposta
+import { userService } from './user.service.js';
+import { createUserSchema } from './user.validation.js';
+
 class UserController {
   async create(req, res, next) {
-    const { error, value } = schema.validate(req.body);
+    const { error, value } = createUserSchema.validate(req.body);
     if (error) return res.status(400).json({...});
     
-    const user = await this.userService.create(value);
+    const user = await userService.create(value);
     return res.status(201).json({ success: true, data: user });
   }
 }
 
+export const userController = new UserController();
+
 // Service: Lógica de negócio
+import { userRepository } from './user.repository.js';
+import bcrypt from 'bcrypt';
+
 class UserService {
   async create(data) {
     // Verificar email duplicado
     // Hash senha
+    const hashedPassword = await bcrypt.hash(data.senha, 10);
     // Criar usuário
-    return user;
+    return userRepository.create({ ...data, senha: hashedPassword });
   }
 }
 
+export const userService = new UserService();
+
 // Repository: Acesso ao banco (Prisma)
+import { prisma } from '../../config/database.js';
+
 class UserRepository {
   async create(data) {
-    return this.prisma.user.create({ data });
+    return prisma.user.create({ data });
   }
 }
+
+export const userRepository = new UserRepository();
 ```
 
 ---
@@ -243,7 +270,7 @@ class UserRepository {
 ```prisma
 model User {
   id           String   @id @default(uuid())
-  ra           String   @unique  // 7 dígitos (ex: 1000000, 2021001)
+  ra           String   @unique  // Identificador único (ex: 1234567, RA2021001)
   nome         String
   email        String   @unique
   senha        String

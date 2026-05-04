@@ -77,12 +77,15 @@ A:
 ```
 
 **Q: Como funciona o RA?**
-A: RA = Registro Acadêmico (7 dígitos gerados automaticamente)
-- Admins: `1000001`, `1000002`, `1000003`...
-- Gestores: `2021001`, `2021002`, `2021003`...
-- Colaboradores: `2022001`, `2022002`, `2022003`...
+A: RA = Registro Acadêmico do ENIAC - cada pessoa já tem seu RA (como CPF)
+- Cada colaborador e gestor já tem seu RA
+- No cadastro, a pessoa informa o RA dela
+- Sistema valida o formato (5 a 15 caracteres) e se não está duplicado
+- Admin também tem RA próprio
+- Sistema NÃO gera RA automaticamente
 
-Formato: `TAAAANN` onde T=tipo, AAAA=ano, NN=sequencial
+**Q: De onde vem o RA?**
+A: Cada pessoa já tem seu RA. É um número único que ela já possui (como CPF). No cadastro, ela informa o RA dela.
 
 **Q: Como buscar por RA?**
 A:

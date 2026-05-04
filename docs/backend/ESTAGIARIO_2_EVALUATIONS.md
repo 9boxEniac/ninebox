@@ -1,5 +1,25 @@
 # ESTAGIÁRIO 2 - Módulo de Avaliações (Evaluations)
 
+## ⚠️ IMPORTANTE: ES Modules
+
+Este projeto usa **ES Modules** (`import/export`) ao invés de CommonJS (`require/module.exports`).
+
+**Configure no package.json:**
+```json
+{
+  "type": "module"
+}
+```
+
+**Use:**
+- ✅ `import express from 'express'`
+- ✅ `export { EvaluationService }`
+- ✅ `export default router`
+- ❌ `const express = require('express')`
+- ❌ `module.exports = { EvaluationService }`
+
+---
+
 ## Sua Responsabilidade
 
 Você vai cuidar de todo o sistema de avaliações de desempenho do Portal de Gestão de Pessoas usando JavaScript puro.
@@ -266,15 +286,15 @@ Authorization: Bearer {token}
 ### evaluation.routes.js
 
 ```javascript
-const express = require('express');
-const { EvaluationController } = require('./evaluation.controller');
-const { authMiddleware, isGestorOrAdminMiddleware, isAdminMiddleware } = require('../../middlewares/auth');
-const { validate } = require('../../middlewares/validate');
-const { 
+import express from 'express';
+import { EvaluationController } from './evaluation.controller.js';
+import { authMiddleware, isGestorOrAdminMiddleware, isAdminMiddleware } from '../../middlewares/auth.js';
+import { validate } from '../../middlewares/validate.js';
+import { 
   createEvaluationSchema, 
   createCommentEvaluationSchema, 
   createNineBoxSchema 
-} = require('./evaluation.validation');
+} from './evaluation.validation.js';
 
 const router = express.Router();
 const evaluationController = new EvaluationController();
@@ -351,7 +371,7 @@ router.delete(
   (req, res, next) => evaluationController.delete(req, res, next)
 );
 
-module.exports = router;
+export default router;
 ```
 
 ### Validações no Service
@@ -360,6 +380,7 @@ module.exports = router;
 
 ```javascript
 // evaluation.service.js
+import { AppError } from '../../utils/errors.js';
 
 /**
  * Atualizar avaliação
@@ -485,7 +506,7 @@ src/modules/evaluations/
 ### evaluation.validation.js
 
 ```javascript
-const Joi = require('joi');
+import Joi from 'joi';
 
 const createEvaluationSchema = Joi.object({
   avaliadoId: Joi.string().uuid().required(),
@@ -521,7 +542,7 @@ const createNineBoxSchema = Joi.object({
   comentario: Joi.string().optional()
 });
 
-module.exports = {
+export {
   createEvaluationSchema,
   createCommentEvaluationSchema,
   createNineBoxSchema
@@ -531,7 +552,7 @@ module.exports = {
 ### evaluation.service.js (Exemplo de método)
 
 ```javascript
-const { AppError } = require('../../utils/errors');
+import { AppError } from '../../utils/errors.js';
 
 class EvaluationService {
   constructor(evaluationRepository, userRepository) {
@@ -689,7 +710,7 @@ class EvaluationService {
   }
 }
 
-module.exports = { EvaluationService };
+export { EvaluationService };
 ```
 
 ---
@@ -732,3 +753,705 @@ module.exports = { EvaluationService };
 ---
 
 Qualquer dúvida, chama.
+
+
+---
+
+## Parte 2: Módulo Nine Box (1h)
+
+### O que é Nine Box?
+
+Nine Box é uma matriz 3×3 que avalia colaboradores em duas dimensões:
+- **Performance** (Desempenho): 1 (Baixo), 2 (Médio), 3 (Alto)
+- **Potential** (Potencial): 1 (Baixo), 2 (Médio), 3 (Alto)
+
+Cada combinação gera uma **categoria automaticamente**:
+
+| Performance | Potential | Categoria |
+|------------|-----------|-----------|
+| 1 | 1 | Questão |
+| 2 | 1 | Trabalhador |
+| 3 | 1 | Âncora |
+| 1 | 2 | Dilema |
+| 2 | 2 | Núcleo |
+| 3 | 2 | Especialista |
+| 1 | 3 | Enigma |
+| 2 | 3 | Estrela |
+| 3 | 3 | Superstar |
+
+---
+
+### Estrutura do Módulo Nine Box
+
+```
+src/modules/ninebox/
+├── ninebox.validation.js
+├── ninebox.repository.js
+├── ninebox.service.js
+├── ninebox.controller.js
+└── ninebox.routes.js
+```
+
+---
+
+### TAREFA 1: Criar pasta ninebox
+
+```bash
+mkdir -p src/modules/ninebox
+```
+
+---
+
+### TAREFA 2: Criar ninebox.validation.js
+
+Arquivo: `src/modules/ninebox/ninebox.validation.js`
+
+```javascript
+import Joi from 'joi';
+
+const createNineBoxSchema = Joi.object({
+  pessoaId: Joi.string().uuid().required(),
+  performance: Joi.number().integer().min(1).max(3).required()
+    .messages({
+      'number.min': 'Performance deve ser entre 1 (baixo) e 3 (alto)',
+      'number.max': 'Performance deve ser entre 1 (baixo) e 3 (alto)'
+    }),
+  potential: Joi.number().integer().min(1).max(3).required()
+    .messages({
+      'number.min': 'Potential deve ser entre 1 (baixo) e 3 (alto)',
+      'number.max': 'Potential deve ser entre 1 (baixo) e 3 (alto)'
+    }),
+  comentario: Joi.string().max(500).optional().allow('', null)
+});
+
+const updateNineBoxSchema = Joi.object({
+  performance: Joi.number().integer().min(1).max(3).optional(),
+  potential: Joi.number().integer().min(1).max(3).optional(),
+  comentario: Joi.string().max(500).optional().allow('', null)
+});
+
+export {
+  createNineBoxSchema,
+  updateNineBoxSchema
+};
+```
+
+---
+
+### TAREFA 3: Criar ninebox.repository.js
+
+Arquivo: `src/modules/ninebox/ninebox.repository.js`
+
+```javascript
+import { prisma } from '../../config/database.js';
+
+class NineBoxRepository {
+  async create(data) {
+    return prisma.nineBox.create({
+      data,
+      include: {
+        pessoa: {
+          select: {
+            id: true,
+            ra: true,
+            nome: true,
+            email: true,
+            tipo: true,
+            cargo: true,
+            departamento: true,
+            foto: true
+          }
+        }
+      }
+    });
+  }
+
+  async findById(id) {
+    return prisma.nineBox.findUnique({
+      where: { id },
+      include: {
+        pessoa: {
+          select: {
+            id: true,
+            ra: true,
+            nome: true,
+            email: true,
+            tipo: true,
+            cargo: true,
+            departamento: true,
+            foto: true
+          }
+        }
+      }
+    });
+  }
+
+  async findAll({ page = 1, limit = 10, categoria, pessoaId }) {
+    const skip = (page - 1) * limit;
+    const where = {};
+
+    if (categoria) where.categoria = categoria;
+    if (pessoaId) where.pessoaId = pessoaId;
+
+    const [nineBoxes, total] = await Promise.all([
+      prisma.nineBox.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          pessoa: {
+            select: {
+              id: true,
+              ra: true,
+              nome: true,
+              email: true,
+              tipo: true,
+              cargo: true,
+              departamento: true,
+              foto: true
+            }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      prisma.nineBox.count({ where })
+    ]);
+
+    return {
+      nineBoxes,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  async findByPessoa(pessoaId) {
+    return prisma.nineBox.findMany({
+      where: { pessoaId },
+      orderBy: { createdAt: 'desc' }
+    });
+  }
+
+  async update(id, data) {
+    return prisma.nineBox.update({
+      where: { id },
+      data,
+      include: {
+        pessoa: {
+          select: {
+            id: true,
+            ra: true,
+            nome: true,
+            email: true,
+            tipo: true,
+            cargo: true,
+            departamento: true,
+            foto: true
+          }
+        }
+      }
+    });
+  }
+
+  async delete(id) {
+    return prisma.nineBox.delete({ where: { id } });
+  }
+
+  async getGridDistribution() {
+    const nineBoxes = await prisma.nineBox.findMany({
+      select: {
+        categoria: true,
+        performance: true,
+        potential: true
+      }
+    });
+
+    const distribution = nineBoxes.reduce((acc, nb) => {
+      if (!acc[nb.categoria]) {
+        acc[nb.categoria] = 0;
+      }
+      acc[nb.categoria]++;
+      return acc;
+    }, {});
+
+    const byCoordinates = nineBoxes.reduce((acc, nb) => {
+      const key = `${nb.performance}-${nb.potential}`;
+      if (!acc[key]) {
+        acc[key] = {
+          performance: nb.performance,
+          potential: nb.potential,
+          categoria: nb.categoria,
+          count: 0
+        };
+      }
+      acc[key].count++;
+      return acc;
+    }, {});
+
+    return {
+      total: nineBoxes.length,
+      porCategoria: distribution,
+      porCoordenadas: Object.values(byCoordinates)
+    };
+  }
+}
+
+export { NineBoxRepository };
+```
+
+---
+
+### TAREFA 4: Criar ninebox.service.js
+
+Arquivo: `src/modules/ninebox/ninebox.service.js`
+
+```javascript
+import { AppError } from '../../utils/errors.js';
+import { UserRepository } from '../users/user.repository.js';
+
+class NineBoxService {
+  constructor(nineBoxRepository) {
+    this.nineBoxRepository = nineBoxRepository;
+    this.userRepository = new UserRepository();
+  }
+
+  // Calcula a categoria baseada em performance e potential
+  calculateCategoria(performance, potential) {
+    const categorias = {
+      '1-1': 'Questão',
+      '2-1': 'Trabalhador',
+      '3-1': 'Âncora',
+      '1-2': 'Dilema',
+      '2-2': 'Núcleo',
+      '3-2': 'Especialista',
+      '1-3': 'Enigma',
+      '2-3': 'Estrela',
+      '3-3': 'Superstar'
+    };
+
+    return categorias[`${performance}-${potential}`] || 'Indefinido';
+  }
+
+  async create(data, userTipo) {
+    // Apenas gestor e admin podem criar
+    if (userTipo === 'colaborador') {
+      throw new AppError('Sem permissão para criar avaliações Nine Box', 403);
+    }
+
+    // Verifica se a pessoa existe
+    const pessoa = await this.userRepository.findById(data.pessoaId);
+    if (!pessoa) {
+      throw new AppError('Pessoa não encontrada', 404);
+    }
+
+    // Calcula a categoria automaticamente
+    const categoria = this.calculateCategoria(data.performance, data.potential);
+
+    const nineBox = await this.nineBoxRepository.create({
+      ...data,
+      categoria
+    });
+
+    return nineBox;
+  }
+
+  async findById(id, userId, userTipo) {
+    const nineBox = await this.nineBoxRepository.findById(id);
+    if (!nineBox) {
+      throw new AppError('Avaliação Nine Box não encontrada', 404);
+    }
+
+    // Colaborador só pode ver suas próprias avaliações
+    if (userTipo === 'colaborador' && nineBox.pessoaId !== userId) {
+      throw new AppError('Sem permissão para ver esta avaliação', 403);
+    }
+
+    return nineBox;
+  }
+
+  async findAll(filters, userId, userTipo) {
+    // Colaborador só pode ver suas próprias avaliações
+    if (userTipo === 'colaborador') {
+      filters.pessoaId = userId;
+    }
+
+    return this.nineBoxRepository.findAll(filters);
+  }
+
+  async findByPessoa(pessoaId, userId, userTipo) {
+    const pessoa = await this.userRepository.findById(pessoaId);
+    if (!pessoa) {
+      throw new AppError('Pessoa não encontrada', 404);
+    }
+
+    // Colaborador só pode ver suas próprias avaliações
+    if (userTipo === 'colaborador' && pessoaId !== userId) {
+      throw new AppError('Sem permissão para ver estas avaliações', 403);
+    }
+
+    return this.nineBoxRepository.findByPessoa(pessoaId);
+  }
+
+  async update(id, data, userTipo) {
+    // Apenas gestor e admin podem atualizar
+    if (userTipo === 'colaborador') {
+      throw new AppError('Sem permissão para atualizar avaliações Nine Box', 403);
+    }
+
+    const nineBox = await this.nineBoxRepository.findById(id);
+    if (!nineBox) {
+      throw new AppError('Avaliação Nine Box não encontrada', 404);
+    }
+
+    // Recalcula categoria se mudou performance ou potential
+    if (data.performance || data.potential) {
+      const performance = data.performance || nineBox.performance;
+      const potential = data.potential || nineBox.potential;
+      data.categoria = this.calculateCategoria(performance, potential);
+    }
+
+    return this.nineBoxRepository.update(id, data);
+  }
+
+  async delete(id, userTipo) {
+    // Apenas admin pode deletar
+    if (userTipo !== 'admin') {
+      throw new AppError('Sem permissão para deletar avaliações Nine Box', 403);
+    }
+
+    const nineBox = await this.nineBoxRepository.findById(id);
+    if (!nineBox) {
+      throw new AppError('Avaliação Nine Box não encontrada', 404);
+    }
+
+    await this.nineBoxRepository.delete(id);
+    return { message: 'Avaliação Nine Box deletada com sucesso' };
+  }
+
+  async getGridDistribution(userTipo) {
+    // Colaborador não pode ver distribuição geral
+    if (userTipo === 'colaborador') {
+      throw new AppError('Sem permissão para ver distribuição do grid', 403);
+    }
+
+    return this.nineBoxRepository.getGridDistribution();
+  }
+}
+
+export { NineBoxService };
+```
+
+---
+
+### TAREFA 5: Criar ninebox.controller.js
+
+Arquivo: `src/modules/ninebox/ninebox.controller.js`
+
+```javascript
+import { NineBoxRepository } from './ninebox.repository.js';
+import { NineBoxService } from './ninebox.service.js';
+
+const nineBoxRepository = new NineBoxRepository();
+const nineBoxService = new NineBoxService(nineBoxRepository);
+
+class NineBoxController {
+  async create(req, res, next) {
+    try {
+      const nineBox = await nineBoxService.create(req.body, req.user.tipo);
+      return res.status(201).json({
+        success: true,
+        data: nineBox,
+        message: 'Avaliação Nine Box criada com sucesso'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findById(req, res, next) {
+    try {
+      const nineBox = await nineBoxService.findById(
+        req.params.id,
+        req.user.userId,
+        req.user.tipo
+      );
+      return res.json({
+        success: true,
+        data: nineBox
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findAll(req, res, next) {
+    try {
+      const { page, limit, categoria, pessoaId } = req.query;
+      const result = await nineBoxService.findAll(
+        {
+          page: parseInt(page) || 1,
+          limit: parseInt(limit) || 10,
+          categoria,
+          pessoaId
+        },
+        req.user.userId,
+        req.user.tipo
+      );
+      return res.json({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async findByPessoa(req, res, next) {
+    try {
+      const nineBoxes = await nineBoxService.findByPessoa(
+        req.params.pessoaId,
+        req.user.userId,
+        req.user.tipo
+      );
+      return res.json({
+        success: true,
+        data: nineBoxes
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async update(req, res, next) {
+    try {
+      const nineBox = await nineBoxService.update(
+        req.params.id,
+        req.body,
+        req.user.tipo
+      );
+      return res.json({
+        success: true,
+        data: nineBox,
+        message: 'Avaliação Nine Box atualizada com sucesso'
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async delete(req, res, next) {
+    try {
+      const result = await nineBoxService.delete(req.params.id, req.user.tipo);
+      return res.json({
+        success: true,
+        message: result.message
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getGridDistribution(req, res, next) {
+    try {
+      const distribution = await nineBoxService.getGridDistribution(req.user.tipo);
+      return res.json({
+        success: true,
+        data: distribution
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+export { NineBoxController };
+```
+
+---
+
+### TAREFA 6: Criar ninebox.routes.js
+
+Arquivo: `src/modules/ninebox/ninebox.routes.js`
+
+```javascript
+import express from 'express';
+import { NineBoxController } from './ninebox.controller.js';
+import { authMiddleware, isGestorOrAdminMiddleware, isAdminMiddleware } from '../../middlewares/auth.js';
+import { validate } from '../../middlewares/validate.js';
+import { createNineBoxSchema, updateNineBoxSchema } from './ninebox.validation.js';
+
+const router = express.Router();
+const nineBoxController = new NineBoxController();
+
+// Todas as rotas precisam de autenticação
+router.use(authMiddleware);
+
+// Rotas públicas (autenticadas)
+router.get('/', (req, res, next) => nineBoxController.findAll(req, res, next));
+router.get('/:id', (req, res, next) => nineBoxController.findById(req, res, next));
+router.get('/pessoa/:pessoaId', (req, res, next) => nineBoxController.findByPessoa(req, res, next));
+
+// Rotas de gestor/admin
+router.get('/stats/distribution', isGestorOrAdminMiddleware, (req, res, next) => nineBoxController.getGridDistribution(req, res, next));
+router.post('/', isGestorOrAdminMiddleware, validate(createNineBoxSchema), (req, res, next) => nineBoxController.create(req, res, next));
+router.put('/:id', isGestorOrAdminMiddleware, validate(updateNineBoxSchema), (req, res, next) => nineBoxController.update(req, res, next));
+
+// Rotas de admin
+router.delete('/:id', isAdminMiddleware, (req, res, next) => nineBoxController.delete(req, res, next));
+
+export default router;
+```
+
+---
+
+### TAREFA 7: Adicionar rota no app.js
+
+Arquivo: `src/app.js` (adicionar linha)
+
+```javascript
+import nineBoxRoutes from './modules/ninebox/ninebox.routes.js';
+
+// ... outras rotas ...
+
+app.use('/api/ninebox', nineBoxRoutes);
+```
+
+---
+
+### TAREFA 8: Testar Nine Box no Postman
+
+**1. Criar avaliação Nine Box (gestor/admin)**
+```
+POST http://localhost:3000/api/ninebox
+Authorization: Bearer SEU_TOKEN_GESTOR
+Content-Type: application/json
+
+{
+  "pessoaId": "uuid-da-pessoa",
+  "performance": 3,
+  "potential": 3,
+  "comentario": "Excelente desempenho e alto potencial"
+}
+```
+
+**Resposta esperada:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "uuid",
+    "pessoaId": "uuid",
+    "performance": 3,
+    "potential": 3,
+    "categoria": "Superstar",
+    "comentario": "Excelente desempenho e alto potencial",
+    "data": "2026-05-04T...",
+    "pessoa": {
+      "id": "uuid",
+      "ra": "2022001",
+      "nome": "Ana Costa",
+      "email": "ana@eniac.edu.br",
+      "tipo": "colaborador",
+      "cargo": "Desenvolvedora"
+    }
+  },
+  "message": "Avaliação Nine Box criada com sucesso"
+}
+```
+
+**2. Listar todas as avaliações Nine Box**
+```
+GET http://localhost:3000/api/ninebox
+Authorization: Bearer SEU_TOKEN
+```
+
+**3. Buscar avaliações de uma pessoa**
+```
+GET http://localhost:3000/api/ninebox/pessoa/uuid-da-pessoa
+Authorization: Bearer SEU_TOKEN
+```
+
+**4. Ver distribuição do grid (gestor/admin)**
+```
+GET http://localhost:3000/api/ninebox/stats/distribution
+Authorization: Bearer SEU_TOKEN_GESTOR
+```
+
+**Resposta esperada:**
+```json
+{
+  "success": true,
+  "data": {
+    "total": 8,
+    "porCategoria": {
+      "Superstar": 2,
+      "Estrela": 3,
+      "Núcleo": 2,
+      "Trabalhador": 1
+    },
+    "porCoordenadas": [
+      {
+        "performance": 3,
+        "potential": 3,
+        "categoria": "Superstar",
+        "count": 2
+      },
+      {
+        "performance": 2,
+        "potential": 3,
+        "categoria": "Estrela",
+        "count": 3
+      }
+    ]
+  }
+}
+```
+
+**5. Atualizar avaliação (gestor/admin)**
+```
+PUT http://localhost:3000/api/ninebox/uuid-da-avaliacao
+Authorization: Bearer SEU_TOKEN_GESTOR
+Content-Type: application/json
+
+{
+  "performance": 2,
+  "potential": 3,
+  "comentario": "Comentário atualizado"
+}
+```
+
+**6. Deletar avaliação (apenas admin)**
+```
+DELETE http://localhost:3000/api/ninebox/uuid-da-avaliacao
+Authorization: Bearer SEU_TOKEN_ADMIN
+```
+
+---
+
+## Resumo Final - Estagiário 2
+
+Você implementou **2 módulos completos**:
+
+### ✅ Módulo de Avaliações
+- CRUD completo de avaliações
+- Validações com Joi
+- Controle de permissões
+- Estatísticas por avaliado
+- Filtros e paginação
+- **10 endpoints**
+
+### ✅ Módulo Nine Box
+- CRUD completo de avaliações Nine Box
+- Cálculo automático de categoria (9 categorias)
+- Validações (performance e potential de 1 a 3)
+- Controle de permissões
+- Distribuição do grid
+- Histórico por pessoa
+- **7 endpoints**
+
+**Total: 17 endpoints implementados**
+
+Próximo passo: Estagiário 3 implementa Competências e Relatórios!

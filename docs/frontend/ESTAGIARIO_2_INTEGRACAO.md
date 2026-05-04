@@ -6,6 +6,26 @@ Você vai integrar as páginas com a API e implementar todas as funcionalidades 
 
 ---
 
+## Pré-requisitos
+
+**IMPORTANTE**: Antes de começar, certifique-se de que:
+
+1. **Backend está rodando** em `http://localhost:3000`
+2. **CORS está configurado** no backend para aceitar requisições do frontend
+3. **Estagiário 1** já criou os módulos base (`api.js`, `auth.js`, `loading.js`, `toast.js`)
+
+**Configuração CORS no Backend** (em `backend/src/app.js`):
+```javascript
+import cors from 'cors';
+
+app.use(cors({
+  origin: 'http://localhost:5500', // URL do Live Server
+  credentials: true
+}));
+```
+
+---
+
 ## Objetivos
 
 1. Criar módulo de validações (incluindo RA)
@@ -16,10 +36,10 @@ Você vai integrar as páginas com a API e implementar todas as funcionalidades 
 6. Melhorar feedback visual
 7. Atualizar dashboard com dados reais
 
-**IMPORTANTE**: O sistema agora usa RA (Registro Acadêmico) de 7 dígitos:
+**IMPORTANTE**: O sistema agora usa RA (Registro Acadêmico):
 - Cada pessoa já tem seu RA (como CPF)
 - No cadastro, a pessoa informa o RA dela
-- Sistema valida se tem 7 dígitos e se não está duplicado
+- Sistema valida o formato (5 a 15 caracteres) e se não está duplicado
 - Usado para buscar usuários: `GET /api/users/ra/:ra`
 - Campo obrigatório no cadastro
 
@@ -94,9 +114,9 @@ const validators = {
     return value && value !== '';
   },
 
-  // Validar RA (7 dígitos numéricos)
+  // Validar RA (5 a 15 caracteres)
   ra(value) {
-    return /^[0-9]{7}$/.test(value);
+    return value && value.length >= 5 && value.length <= 15;
   },
 };
 
@@ -156,7 +176,7 @@ function getErrorMessage(validator, fieldName, params = []) {
     number: 'Deve ser um número válido',
     range: `Valor deve estar entre ${params[0]} e ${params[1]}`,
     selected: 'Selecione uma opção',
-    ra: 'RA deve ter 7 dígitos numéricos',
+    ra: 'RA deve ter entre 5 e 15 caracteres',
   };
   return messages[validator] || 'Campo inválido';
 }
@@ -223,7 +243,67 @@ window.addRealtimeValidation = addRealtimeValidation;
 
 **Modificar `pages/cadastrar.html`:**
 
-Adicionar no final, antes de `</body>`:
+**1. Corrigir os tipos de usuário nos botões:**
+```html
+<!-- TIPO -->
+<div class="pg-type-toggle" role="group">
+  <button class="pg-type-btn active" data-tipo="colaborador" onclick="setTipoCad('colaborador')">
+    <i class="fa-solid fa-user"></i> Colaborador
+  </button>
+  <button class="pg-type-btn" data-tipo="gestor" onclick="setTipoCad('gestor')">
+    <i class="fa-solid fa-user-tie"></i> Gestor
+  </button>
+</div>
+```
+
+**2. Adicionar todos os campos obrigatórios:**
+```html
+<!-- FOTO -->
+<div class="pg-foto-wrap">
+  <div class="pg-foto-preview" id="foto-preview" onclick="document.getElementById('cad-foto').click()">
+    <i class="fa-solid fa-camera"></i>
+    <span>Adicionar foto (opcional)</span>
+  </div>
+  <input type="file" id="cad-foto" accept="image/*" style="display:none" onchange="previewFoto(this)">
+</div>
+
+<div class="pg-field">
+  <label for="cad-ra">RA (Registro Acadêmico) *</label>
+  <input type="text" id="cad-ra" placeholder="Ex: 1234567, RA2021001" maxlength="15" autocomplete="off">
+  <small style="color: var(--text-muted); font-size: 12px;">Cada pessoa já possui seu RA único</small>
+</div>
+
+<div class="pg-field">
+  <label for="cad-nome">Nome completo *</label>
+  <input type="text" id="cad-nome" placeholder="Digite o nome completo" autocomplete="off">
+</div>
+
+<div class="pg-field">
+  <label for="cad-email">E-mail *</label>
+  <input type="email" id="cad-email" placeholder="nome@empresa.com">
+</div>
+
+<div class="pg-field">
+  <label for="cad-senha">Senha *</label>
+  <input type="password" id="cad-senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+</div>
+
+<div class="pg-field" id="campo-cargo">
+  <label for="cad-cargo">Cargo</label>
+  <input type="text" id="cad-cargo" placeholder="Ex: Analista, Desenvolvedor">
+</div>
+
+<div class="pg-field" id="campo-departamento" style="display:none">
+  <label for="cad-departamento">Departamento</label>
+  <input type="text" id="cad-departamento" placeholder="Ex: TI, RH, Financeiro">
+</div>
+
+<button class="pg-btn" onclick="cadastrarPessoa()">
+  <i class="fa-solid fa-user-plus"></i> Cadastrar
+</button>
+```
+
+**3. Adicionar scripts no final, antes de `</body>`:**
 ```html
 <script src="../js/config.js"></script>
 <script src="../js/api.js"></script>
@@ -252,14 +332,14 @@ function setTipoCad(tipo) {
   });
 
   // Mostrar/ocultar campos específicos
-  const campoDisciplina = document.getElementById('campo-disciplina');
+  const campoCargo = document.getElementById('campo-cargo');
   const campoDepartamento = document.getElementById('campo-departamento');
   
   if (tipo === 'gestor') {
-    if (campoDisciplina) campoDisciplina.style.display = 'none';
+    if (campoCargo) campoCargo.style.display = 'none';
     if (campoDepartamento) campoDepartamento.style.display = 'block';
   } else {
-    if (campoDisciplina) campoDisciplina.style.display = 'block';
+    if (campoCargo) campoCargo.style.display = 'block';
     if (campoDepartamento) campoDepartamento.style.display = 'none';
   }
 }
@@ -307,7 +387,7 @@ async function cadastrarPessoa() {
   const nome = document.getElementById('cad-nome').value.trim();
   const email = document.getElementById('cad-email').value.trim();
   const senha = document.getElementById('cad-senha').value;
-  const disciplina = document.getElementById('cad-disciplina')?.value.trim();
+  const cargo = document.getElementById('cad-cargo')?.value.trim();
   const departamento = document.getElementById('cad-departamento')?.value.trim();
 
   // Validar campos
@@ -364,8 +444,8 @@ async function cadastrarPessoa() {
     userData.departamento = departamento;
   }
 
-  if (tipoSelecionado === 'colaborador' && disciplina) {
-    userData.cargo = disciplina; // Usar cargo para armazenar disciplina
+  if (tipoSelecionado === 'colaborador' && cargo) {
+    userData.cargo = cargo;
   }
 
   try {
@@ -391,8 +471,8 @@ async function cadastrarPessoa() {
     document.getElementById('cad-nome').value = '';
     document.getElementById('cad-email').value = '';
     document.getElementById('cad-senha').value = '';
-    if (disciplina) document.getElementById('cad-disciplina').value = '';
-    if (departamento) document.getElementById('cad-departamento').value = '';
+    if (document.getElementById('cad-cargo')) document.getElementById('cad-cargo').value = '';
+    if (document.getElementById('cad-departamento')) document.getElementById('cad-departamento').value = '';
     
     // Resetar foto
     fotoBase64 = null;
@@ -491,13 +571,14 @@ function renderPessoas() {
       <div class="pg-pessoa-info">
         <h4>${pessoa.nome}</h4>
         <p class="pg-pessoa-email">${pessoa.email}</p>
+        <p class="pg-pessoa-ra">RA: ${pessoa.ra}</p>
         <span class="pg-pessoa-badge ${pessoa.tipo}">${pessoa.tipo === 'gestor' ? 'Gestor' : 'Colaborador'}</span>
       </div>
       <div class="pg-pessoa-actions">
         <button class="pg-btn-icon" onclick="verPerfil('${pessoa.id}')" title="Ver perfil">
           <i class="fa-solid fa-eye"></i>
         </button>
-        ${auth.isGestor() ? `
+        ${auth.isAdmin() ? `
           <button class="pg-btn-icon danger" onclick="confirmarExclusao('${pessoa.id}', '${pessoa.nome}')" title="Excluir">
             <i class="fa-solid fa-trash"></i>
           </button>
@@ -628,6 +709,13 @@ document.addEventListener('DOMContentLoaded', () => {
   margin: 0 0 6px 0;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.pg-pessoa-ra {
+  margin: 0 0 6px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .pg-pessoa-badge {
@@ -838,3 +926,467 @@ document.addEventListener('DOMContentLoaded', carregarDashboard);
 ---
 
 Qualquer dúvida, chama.
+
+
+---
+
+### TAREFA 5: Implementar Edição de Usuários
+
+#### 5.1 Adicionar método update no api.js
+
+Arquivo: `js/api.js` (adicionar método)
+
+```javascript
+class API {
+  // ... métodos existentes ...
+
+  async updateUser(id, userData) {
+    return this.request(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async updateProfile(userData) {
+    return this.request('/users/profile', {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async updateEvaluation(id, data) {
+    return this.request(`/evaluations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateNineBox(id, data) {
+    return this.request(`/ninebox/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateCompetency(id, data) {
+    return this.request(`/competencies/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+}
+```
+
+---
+
+#### 5.2 Criar modal de edição
+
+**Adicionar no HTML (exemplo: `pages/consultar.html`):**
+
+```html
+<!-- Modal de Edição -->
+<div id="modal-editar" class="modal" style="display:none">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Editar Usuário</h3>
+      <button class="modal-close" onclick="fecharModalEditar()">
+        <i class="fa-solid fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="pg-field">
+        <label for="edit-nome">Nome completo *</label>
+        <input type="text" id="edit-nome" placeholder="Digite o nome completo">
+      </div>
+
+      <div class="pg-field">
+        <label for="edit-email">E-mail *</label>
+        <input type="email" id="edit-email" placeholder="nome@empresa.com">
+      </div>
+
+      <div class="pg-field">
+        <label for="edit-cargo">Cargo</label>
+        <input type="text" id="edit-cargo" placeholder="Ex: Analista, Desenvolvedor">
+      </div>
+
+      <div class="pg-field">
+        <label for="edit-departamento">Departamento</label>
+        <input type="text" id="edit-departamento" placeholder="Ex: TI, RH, Financeiro">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="pg-btn secondary" onclick="fecharModalEditar()">Cancelar</button>
+      <button class="pg-btn" onclick="salvarEdicao()">Salvar</button>
+    </div>
+  </div>
+</div>
+```
+
+**CSS do Modal (adicionar em `css/components.css`):**
+
+```css
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--primary);
+  font-size: 18px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 20px;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--danger);
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.pg-btn.secondary {
+  background: var(--border);
+  color: var(--text);
+}
+
+.pg-btn.secondary:hover {
+  background: var(--text-muted);
+}
+```
+
+---
+
+#### 5.3 Implementar lógica de edição
+
+**Adicionar em `js/pages/consultar.js`:**
+
+```javascript
+let usuarioEditando = null;
+
+// Abrir modal de edição
+function abrirModalEditar(id) {
+  const pessoa = pessoas.find(p => p.id === id);
+  if (!pessoa) {
+    toast.error('Pessoa não encontrada');
+    return;
+  }
+
+  usuarioEditando = pessoa;
+
+  // Preencher campos
+  document.getElementById('edit-nome').value = pessoa.nome;
+  document.getElementById('edit-email').value = pessoa.email;
+  document.getElementById('edit-cargo').value = pessoa.cargo || '';
+  document.getElementById('edit-departamento').value = pessoa.departamento || '';
+
+  // Mostrar modal
+  document.getElementById('modal-editar').style.display = 'flex';
+}
+
+// Fechar modal
+function fecharModalEditar() {
+  document.getElementById('modal-editar').style.display = 'none';
+  usuarioEditando = null;
+}
+
+// Salvar edição
+async function salvarEdicao() {
+  if (!usuarioEditando) return;
+
+  const nome = document.getElementById('edit-nome').value.trim();
+  const email = document.getElementById('edit-email').value.trim();
+  const cargo = document.getElementById('edit-cargo').value.trim();
+  const departamento = document.getElementById('edit-departamento').value.trim();
+
+  // Validar campos
+  if (!nome) {
+    toast.error('Nome é obrigatório');
+    return;
+  }
+
+  if (!email) {
+    toast.error('Email é obrigatório');
+    return;
+  }
+
+  if (!validators.email(email)) {
+    toast.error('Email inválido');
+    return;
+  }
+
+  try {
+    loading.show('Salvando...');
+
+    const userData = {
+      nome,
+      email,
+      cargo,
+      departamento
+    };
+
+    // Chamar API para atualizar
+    await api.updateUser(usuarioEditando.id, userData);
+
+    toast.success('Usuário atualizado com sucesso!');
+    
+    // Fechar modal
+    fecharModalEditar();
+
+    // Recarregar lista
+    carregarPessoas();
+
+  } catch (error) {
+    console.error('Erro ao atualizar:', error);
+    toast.error(error.message || 'Erro ao atualizar usuário');
+  } finally {
+    loading.hide();
+  }
+}
+```
+
+---
+
+#### 5.4 Adicionar botão de editar na listagem
+
+**Atualizar função `renderPessoas()` em `js/pages/consultar.js`:**
+
+```javascript
+function renderPessoas() {
+  const container = document.getElementById('lista-pessoas');
+  if (!container) return;
+
+  if (pessoas.length === 0) {
+    container.innerHTML = '<p class="pg-empty">Nenhuma pessoa encontrada.</p>';
+    return;
+  }
+
+  container.innerHTML = pessoas.map(pessoa => `
+    <div class="pg-pessoa-card">
+      <div class="pg-pessoa-avatar">
+        ${pessoa.foto 
+          ? `<img src="${pessoa.foto}" alt="${pessoa.nome}">`
+          : `<span>${utils.getInitials(pessoa.nome)}</span>`
+        }
+      </div>
+      <div class="pg-pessoa-info">
+        <h4>${pessoa.nome}</h4>
+        <p class="pg-pessoa-email">${pessoa.email}</p>
+        <p class="pg-pessoa-ra">RA: ${pessoa.ra}</p>
+        <span class="pg-pessoa-badge ${pessoa.tipo}">${pessoa.tipo === 'gestor' ? 'Gestor' : 'Colaborador'}</span>
+      </div>
+      <div class="pg-pessoa-actions">
+        <button class="pg-btn-icon" onclick="verPerfil('${pessoa.id}')" title="Ver perfil">
+          <i class="fa-solid fa-eye"></i>
+        </button>
+        ${auth.isGestorOrAdmin() ? `
+          <button class="pg-btn-icon" onclick="abrirModalEditar('${pessoa.id}')" title="Editar">
+            <i class="fa-solid fa-edit"></i>
+          </button>
+        ` : ''}
+        ${auth.isAdmin() ? `
+          <button class="pg-btn-icon danger" onclick="confirmarExclusao('${pessoa.id}', '${pessoa.nome}')" title="Excluir">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        ` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+```
+
+---
+
+#### 5.5 Implementar edição de perfil próprio
+
+**Criar `js/pages/perfil.js`:**
+
+```javascript
+// js/pages/perfil.js
+
+let modoEdicao = false;
+
+async function carregarPerfil() {
+  try {
+    loading.show('Carregando perfil...');
+
+    const response = await api.getProfile();
+    const user = response.data;
+
+    // Preencher dados
+    document.getElementById('perfil-nome').textContent = user.nome;
+    document.getElementById('perfil-email').textContent = user.email;
+    document.getElementById('perfil-ra').textContent = user.ra;
+    document.getElementById('perfil-tipo').textContent = user.tipo === 'gestor' ? 'Gestor' : 'Colaborador';
+    document.getElementById('perfil-cargo').textContent = user.cargo || '-';
+    document.getElementById('perfil-departamento').textContent = user.departamento || '-';
+
+    // Avatar
+    const avatar = document.getElementById('perfil-avatar');
+    if (user.foto) {
+      avatar.innerHTML = `<img src="${user.foto}" alt="${user.nome}">`;
+    } else {
+      avatar.innerHTML = utils.getInitials(user.nome);
+    }
+
+  } catch (error) {
+    console.error('Erro ao carregar perfil:', error);
+    toast.error('Erro ao carregar perfil');
+  } finally {
+    loading.hide();
+  }
+}
+
+function ativarEdicao() {
+  modoEdicao = true;
+
+  // Transformar textos em inputs
+  const nome = document.getElementById('perfil-nome').textContent;
+  const cargo = document.getElementById('perfil-cargo').textContent;
+  const departamento = document.getElementById('perfil-departamento').textContent;
+
+  document.getElementById('perfil-nome').innerHTML = `<input type="text" id="edit-perfil-nome" value="${nome}">`;
+  document.getElementById('perfil-cargo').innerHTML = `<input type="text" id="edit-perfil-cargo" value="${cargo === '-' ? '' : cargo}">`;
+  document.getElementById('perfil-departamento').innerHTML = `<input type="text" id="edit-perfil-departamento" value="${departamento === '-' ? '' : departamento}">`;
+
+  // Mostrar botões de salvar/cancelar
+  document.getElementById('btn-editar').style.display = 'none';
+  document.getElementById('btn-salvar').style.display = 'inline-block';
+  document.getElementById('btn-cancelar').style.display = 'inline-block';
+}
+
+function cancelarEdicao() {
+  modoEdicao = false;
+  carregarPerfil();
+
+  // Mostrar botão de editar
+  document.getElementById('btn-editar').style.display = 'inline-block';
+  document.getElementById('btn-salvar').style.display = 'none';
+  document.getElementById('btn-cancelar').style.display = 'none';
+}
+
+async function salvarPerfil() {
+  const nome = document.getElementById('edit-perfil-nome').value.trim();
+  const cargo = document.getElementById('edit-perfil-cargo').value.trim();
+  const departamento = document.getElementById('edit-perfil-departamento').value.trim();
+
+  if (!nome) {
+    toast.error('Nome é obrigatório');
+    return;
+  }
+
+  try {
+    loading.show('Salvando...');
+
+    const userData = {
+      nome,
+      cargo: cargo || null,
+      departamento: departamento || null
+    };
+
+    await api.updateProfile(userData);
+
+    toast.success('Perfil atualizado com sucesso!');
+    
+    modoEdicao = false;
+    carregarPerfil();
+
+    // Mostrar botão de editar
+    document.getElementById('btn-editar').style.display = 'inline-block';
+    document.getElementById('btn-salvar').style.display = 'none';
+    document.getElementById('btn-cancelar').style.display = 'none';
+
+  } catch (error) {
+    console.error('Erro ao salvar perfil:', error);
+    toast.error(error.message || 'Erro ao salvar perfil');
+  } finally {
+    loading.hide();
+  }
+}
+
+// Carregar ao iniciar
+document.addEventListener('DOMContentLoaded', () => {
+  if (!auth.requireAuth()) return;
+  carregarPerfil();
+});
+```
+
+---
+
+## Resumo - Operações CRUD Completas
+
+Agora o frontend tem **todas as operações CRUD**:
+
+### ✅ CREATE (Criar)
+- `api.register(userData)` - Cadastrar usuário
+- `api.createEvaluation(data)` - Criar avaliação
+- `api.createNineBox(data)` - Criar Nine Box
+- `api.createCompetency(data)` - Criar competência
+
+### ✅ READ (Ler)
+- `api.getUsers(filters)` - Listar usuários
+- `api.getUserByRA(ra)` - Buscar por RA
+- `api.getProfile()` - Ver perfil
+- `api.getEvaluations(filters)` - Listar avaliações
+- `api.getDashboard()` - Dashboard
+
+### ✅ UPDATE (Atualizar)
+- `api.updateUser(id, userData)` - Atualizar usuário
+- `api.updateProfile(userData)` - Atualizar perfil próprio
+- `api.updateEvaluation(id, data)` - Atualizar avaliação
+- `api.updateNineBox(id, data)` - Atualizar Nine Box
+- `api.updateCompetency(id, data)` - Atualizar competência
+
+### ✅ DELETE (Deletar)
+- `api.deleteUser(id)` - Deletar usuário
+- `api.deleteEvaluation(id)` - Deletar avaliação
+- `api.deleteNineBox(id)` - Deletar Nine Box
+- `api.deleteCompetency(id)` - Deletar competência
+
+**Frontend completo com CRUD total!** 🚀

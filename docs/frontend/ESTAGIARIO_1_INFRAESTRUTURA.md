@@ -19,7 +19,7 @@ Você vai cuidar da infraestrutura base do frontend e do sistema de autenticaç�
 - **Gestor** - Pode avaliar colaboradores (RA é o número que a pessoa já possui)
 - **Colaborador** - Acesso limitado (RA é o número que a pessoa já possui)
 
-**Sistema de RA**: Cada pessoa já tem seu RA (como CPF). No cadastro, a pessoa informa o RA dela. Sistema valida se tem 7 dígitos e se não está duplicado.
+**Sistema de RA**: Cada pessoa já tem seu RA (como CPF). No cadastro, a pessoa informa o RA dela. Sistema valida o formato (5 a 15 caracteres) e se não está duplicado.
 
 Você deve implementar métodos `isAdmin()` e `requireAdmin()` no módulo de autenticação.
 
@@ -52,6 +52,10 @@ pages/
 
 ### TAREFA 1: Criar config.js
 
+**IMPORTANTE**: O frontend faz requisições para o backend em `http://localhost:3000/api`.
+
+Certifique-se de que o backend está rodando e tem **CORS configurado** para aceitar requisições do frontend (normalmente `http://localhost:5500` com Live Server).
+
 ```javascript
 // js/config.js
 
@@ -64,6 +68,16 @@ const CONFIG = {
 
 // Exportar para uso global
 window.CONFIG = CONFIG;
+```
+
+**Configuração CORS no Backend** (em `backend/src/app.js`):
+```javascript
+import cors from 'cors';
+
+app.use(cors({
+  origin: 'http://localhost:5500', // URL do Live Server
+  credentials: true
+}));
 ```
 
 ---

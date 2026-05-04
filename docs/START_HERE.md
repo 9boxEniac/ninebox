@@ -15,7 +15,7 @@ Tem tudo:
 - Setup completo
 - Arquitetura (Controller → Service → Repository)
 - Sistema de permissões (Admin/Gestor/Colaborador)
-- Sistema de RA (7 dígitos)
+- Sistema de RA (identificador único)
 - Exemplos de código
 - Como testar
 

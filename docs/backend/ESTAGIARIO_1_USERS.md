@@ -1,5 +1,25 @@
 # Estagiário 1 - Módulo de Usuários
 
+## ⚠️ IMPORTANTE: ES Modules
+
+Este projeto usa **ES Modules** (`import/export`) ao invés de CommonJS (`require/module.exports`).
+
+**Configure no package.json:**
+```json
+{
+  "type": "module"
+}
+```
+
+**Use:**
+- ✅ `import express from 'express'`
+- ✅ `export { UserService }`
+- ✅ `export default router`
+- ❌ `const express = require('express')`
+- ❌ `module.exports = { UserService }`
+
+---
+
 ## O que você vai fazer
 
 Você cuida de **tudo relacionado a usuários**: cadastro, login, permissões, busca por RA.
@@ -28,9 +48,11 @@ Cadastrar usuário novo (só admin pode)
 
 **Regras:**
 - Só admin cadastra
-- RA tem que ter 7 dígitos
+- RA deve ter entre 5 e 15 caracteres
 - RA e email únicos
 - Não pode criar admin pela API
+- **IMPORTANTE**: Use ES Modules (`import/export`) ao invés de CommonJS (`require/module.exports`)
+- Configure `"type": "module"` no package.json
 
 ### 2. POST /api/users/login
 Login básico
@@ -84,6 +106,8 @@ Deletar usuário (só admin)
 
 ```javascript
 // src/middlewares/auth.js
+import jwt from 'jsonwebtoken';
+import { AppError } from '../utils/errors.js';
 
 // Verifica se tá logado
 function authMiddleware(req, res, next) {
@@ -106,17 +130,19 @@ function isGestorOrAdminMiddleware(req, res, next) {
   }
   next();
 }
+
+export { authMiddleware, isAdminMiddleware, isGestorOrAdminMiddleware };
 ```
 
 ---
 
 ## Sistema de RA
 
-**O que é:** Número único de 7 dígitos que cada pessoa já tem (tipo CPF)
+**O que é:** Número único que cada pessoa já tem (tipo CPF)
 
 **Como funciona:**
 - Pessoa informa o RA dela no cadastro
-- Sistema valida se tem 7 dígitos
+- Sistema valida se está no formato correto (5 a 15 caracteres)
 - Sistema checa se não tá duplicado
 - Pronto
 
@@ -246,9 +272,9 @@ class UserRepository {
 ### user.service.js
 
 ```javascript
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { AppError } = require('../../utils/errors');
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { AppError } from '../../utils/errors.js';
 
 class UserService {
   constructor(userRepository) {
@@ -343,8 +369,8 @@ class UserService {
 ### user.routes.js
 
 ```javascript
-const { Router } = require('express');
-const { authMiddleware, isAdminMiddleware, isGestorOrAdminMiddleware } = require('../../middlewares/auth');
+import { Router } from 'express';
+import { authMiddleware, isAdminMiddleware, isGestorOrAdminMiddleware } from '../../middlewares/auth.js';
 
 const router = Router();
 
@@ -488,7 +514,7 @@ Qualquer dúvida, chama.
 
 1. Sistema de cadastro e login com JWT
 2. Sistema de permissões (Admin, Gestor, Colaborador)
-3. Sistema de RA (Registro Acadêmico - 7 dígitos)
+3. Sistema de RA (Registro Acadêmico - identificador único)
 4. Gestão de perfis de usuários
 5. Busca por RA
 6. Upload de fotos de perfil (opcional)
@@ -533,7 +559,7 @@ Qualquer dúvida, chama.
 
 **Regras**:
 - ✅ Apenas admin pode cadastrar
-- ✅ RA deve ter 7 dígitos
+- ✅ RA deve ter entre 5 e 15 caracteres
 - ✅ RA deve ser único
 - ✅ Email deve ser único
 - ❌ Não pode criar admin pela API
@@ -705,6 +731,8 @@ Authorization: Bearer {token}
 
 ```javascript
 // src/middlewares/auth.js
+import jwt from 'jsonwebtoken';
+import { AppError } from '../utils/errors.js';
 
 // 1. authMiddleware - Verifica se está autenticado
 function authMiddleware(req, res, next) {
@@ -727,6 +755,8 @@ function isGestorOrAdminMiddleware(req, res, next) {
   }
   next();
 }
+
+export { authMiddleware, isAdminMiddleware, isGestorOrAdminMiddleware };
 ```
 
 ---
@@ -743,6 +773,8 @@ function isGestorOrAdminMiddleware(req, res, next) {
 
 ```javascript
 // user.validation.js
+import Joi from 'joi';
+
 const createUserSchema = Joi.object({
   ra: Joi.string()
     .pattern(/^[0-9]{7}$/)
@@ -760,6 +792,8 @@ const createUserSchema = Joi.object({
   cargo: Joi.string().optional(),
   departamento: Joi.string().optional()
 });
+
+export { createUserSchema };
 ```
 
 **IMPORTANTE**: Cada pessoa já tem seu RA. No cadastro, pergunte o RA dela e use esse número.
@@ -875,9 +909,9 @@ class UserRepository {
 ### 3. Service (user.service.js)
 
 ```javascript
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { AppError } = require('../../utils/errors');
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { AppError } from '../../utils/errors.js';
 
 class UserService {
   constructor(userRepository) {
@@ -974,8 +1008,8 @@ class UserService {
 ### 4. Rotas (user.routes.js)
 
 ```javascript
-const { Router } = require('express');
-const { authMiddleware, isAdminMiddleware, isGestorOrAdminMiddleware } = require('../../middlewares/auth');
+import { Router } from 'express';
+import { authMiddleware, isAdminMiddleware, isGestorOrAdminMiddleware } from '../../middlewares/auth.js';
 
 const router = Router();
 
@@ -1007,7 +1041,7 @@ router.delete('/:id', isAdminMiddleware, (req, res, next) =>
   userController.deleteUser(req, res, next)
 );
 
-module.exports = { userRoutes: router };
+export default router;
 ```
 
 ---
@@ -1123,6 +1157,74 @@ Colaborador:
 ```
 
 **LEMBRE-SE**: Use RAs reais das pessoas. Cada pessoa já tem seu RA.
+
+---
+
+## 🌐 Integração com Frontend
+
+### Configurar CORS
+
+O frontend precisa fazer requisições para o backend. Configure CORS no `src/app.js`:
+
+```javascript
+import cors from 'cors';
+
+const app = express();
+
+// Configurar CORS
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5500', // Porta do Live Server
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+```
+
+### URL da API
+
+O frontend deve fazer requisições para:
+```
+http://localhost:3000/api/users
+```
+
+### Exemplo de requisição do frontend
+
+```javascript
+// Login
+const response = await fetch('http://localhost:3000/api/users/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'admin@eniac.edu.br',
+    senha: 'admin123'
+  })
+});
+
+const data = await response.json();
+const token = data.data.token;
+
+// Usar token nas próximas requisições
+const users = await fetch('http://localhost:3000/api/users', {
+  headers: {
+    'Authorization': `Bearer ${token}`
+  }
+});
+```
+
+### Variáveis de Ambiente
+
+Crie `.env` na raiz do backend:
+```env
+PORT=3000
+NODE_ENV=development
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+JWT_SECRET="seu_secret_super_seguro_aqui"
+JWT_EXPIRES_IN=7d
+CORS_ORIGIN=http://localhost:5500
+```
 
 ---
 
